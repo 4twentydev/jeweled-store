@@ -1,15 +1,27 @@
-import { db } from "@/db";
-import { orders } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { getDb } from "@/db"
+import { orders, orderItems } from "@/db/schema"
+import { eq } from "drizzle-orm"
 
 export async function getOrders() {
-  return db.select().from(orders);
+  return getDb().select().from(orders).orderBy(orders.createdAt)
 }
 
-export async function getOrderByStripeSession(stripeSessionId: string) {
-  const [order] = await db
+export async function getOrderByStripeSession(stripeCheckoutSessionId: string) {
+  const [order] = await getDb()
     .select()
     .from(orders)
-    .where(eq(orders.stripeSessionId, stripeSessionId));
-  return order ?? null;
+    .where(eq(orders.stripeCheckoutSessionId, stripeCheckoutSessionId))
+  return order ?? null
+}
+
+export async function getOrderWithItems(orderId: string) {
+  const order = await getDb().query.orders.findFirst({
+    where: eq(orders.id, orderId),
+    with: { orderItems: true },
+  })
+  return order ?? null
+}
+
+export async function getOrderItemsByOrderId(orderId: string) {
+  return getDb().select().from(orderItems).where(eq(orderItems.orderId, orderId))
 }
