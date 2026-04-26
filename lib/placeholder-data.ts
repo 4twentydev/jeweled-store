@@ -72,9 +72,9 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
 
 export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
   {
-    slug: "lighters",
+    slug: "bejeweled-lighters",
     label: "Lighters",
-    description: "Fully bejeweled Zippo bases",
+    description: "Fully bejeweled lighter bodies",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(212,175,55,0.11) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(212,175,55,0.2) 0%, transparent 65%)",
   },
@@ -88,19 +88,26 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
   {
     slug: "small-cases",
     label: "Small Cases",
-    description: "Pillboxes, cardholders, compacts",
+    description: "Pillboxes, compacts, mirrors",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(125,249,255,0.07) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(125,249,255,0.14) 0%, transparent 65%)",
   },
   {
-    slug: "beauty",
-    label: "Beauty",
-    description: "Crystal-encrusted beauty objects",
+    slug: "lip-balms",
+    label: "Lip Balms",
+    description: "Crystal-encrusted lip care",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.09) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.18) 0%, transparent 65%)",
   },
   {
-    slug: "custom",
+    slug: "lotions",
+    label: "Lotions",
+    description: "Shimmer-infused body care",
+    gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.09) 0%, transparent 65%)",
+    hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.18) 0%, transparent 65%)",
+  },
+  {
+    slug: "custom-rhinestone-items",
     label: "Custom",
     description: "Bespoke commissions",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(247,244,239,0.04) 0%, transparent 65%)",

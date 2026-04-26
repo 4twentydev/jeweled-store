@@ -12,7 +12,7 @@ export function CategoryStrip() {
             Browse
           </p>
           <Link
-            href="/shop"
+            href="/products"
             className="text-[10px] tracking-[0.22em] uppercase text-foreground/50 hover:text-foreground transition-colors"
           >
             Shop All →
@@ -20,18 +20,16 @@ export function CategoryStrip() {
         </FadeUp>
 
         <FadeUp delay={0.05}>
-          {/* Asymmetric grid — first tile is 2-wide on large screens */}
           <div
-            className="grid grid-cols-2 lg:grid-cols-5 gap-px"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px"
             style={{ backgroundColor: "rgba(255,255,255,0.065)" }}
           >
-            {PLACEHOLDER_CATEGORIES.map((cat, i) => (
+            {PLACEHOLDER_CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
-                href={`/shop?category=${cat.slug}`}
+                href={`/products?category=${cat.slug}`}
                 className={cn(
-                  "group relative flex flex-col justify-end p-6 lg:p-8 overflow-hidden min-h-[200px] lg:min-h-[300px]",
-                  i === 0 && "col-span-2 min-h-[260px] lg:min-h-[360px]"
+                  "group relative flex flex-col justify-end p-6 lg:p-8 overflow-hidden min-h-[200px] lg:min-h-[300px]"
                 )}
               >
                 {/* Base gradient */}
