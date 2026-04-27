@@ -1,6 +1,6 @@
 import Link from "next/link"
-import { ShoppingBag } from "lucide-react"
 import { MobileNav } from "@/components/mobile-nav"
+import { CartButton } from "@/components/cart/cart-button"
 
 function NavLink({
   href,
@@ -40,19 +40,7 @@ export function Header() {
 
         {/* Right — cart + mobile toggle */}
         <div className="flex items-center gap-5">
-          <Link
-            href="/cart"
-            aria-label="Cart"
-            className="flex items-center gap-1.5 text-foreground/60 hover:text-foreground transition-colors"
-          >
-            <ShoppingBag className="size-[17px]" />
-            <span
-              className="text-[10px] font-mono tabular-nums leading-none"
-              style={{ color: "var(--jwld-accent)" }}
-            >
-              0
-            </span>
-          </Link>
+          <CartButton />
 
           <MobileNav />
         </div>

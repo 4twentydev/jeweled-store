@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { getProductBySlug } from "@/db/queries/products"
+import { AddToCart } from "@/components/cart/add-to-cart"
 
 const GRADIENT_MAP: Record<string, string> = {
   "bejeweled-lighters":
@@ -108,14 +109,19 @@ export default async function ProductPage({
               <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
                 Out of stock
               </p>
-            ) : product.stock <= 5 ? (
-              <p
-                className="text-[10px] tracking-[0.2em] uppercase"
-                style={{ color: "var(--jwld-accent)" }}
-              >
-                Only {product.stock} left
-              </p>
-            ) : null}
+            ) : (
+              <>
+                {product.stock <= 5 && (
+                  <p
+                    className="text-[10px] tracking-[0.2em] uppercase mb-6"
+                    style={{ color: "var(--jwld-accent)" }}
+                  >
+                    Only {product.stock} left
+                  </p>
+                )}
+                <AddToCart product={product} />
+              </>
+            )}
           </div>
         </div>
       </div>

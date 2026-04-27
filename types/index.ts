@@ -20,4 +20,5 @@ export type CartItem = {
   priceCents: number
   image: string | null
   quantity: number
+  maxStock: number
 }

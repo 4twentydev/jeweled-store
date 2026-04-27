@@ -1,5 +1,6 @@
 import Link from "next/link"
 import type { Product } from "@/types"
+import { QuickAdd } from "@/components/cart/quick-add"
 
 const GRADIENT_MAP: Record<string, string> = {
   "bejeweled-lighters":
@@ -66,6 +67,7 @@ export function ProductCard({ product }: Props) {
           </span>
         )}
         <div className="absolute inset-0 bg-white/[0.025] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <QuickAdd product={product} />
       </div>
 
       <div className="space-y-1">
