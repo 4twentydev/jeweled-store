@@ -45,7 +45,10 @@ export async function createProduct(data: ProductFormInput): Promise<ActionResul
   }
 
   revalidatePath("/admin/products")
+  revalidatePath("/admin")
+  revalidatePath("/")
   revalidatePath("/products")
+  revalidatePath(`/product/${slug}`)
   redirect("/admin/products")
 }
 
@@ -59,6 +62,11 @@ export async function updateProduct(id: string, data: ProductFormInput): Promise
     parsed.data
 
   try {
+    const [existing] = await getDb()
+      .select({ slug: products.slug })
+      .from(products)
+      .where(eq(products.id, id))
+
     await getDb()
       .update(products)
       .set({
@@ -72,6 +80,8 @@ export async function updateProduct(id: string, data: ProductFormInput): Promise
         active,
       })
       .where(eq(products.id, id))
+
+    if (existing?.slug) revalidatePath(`/product/${existing.slug}`)
   } catch (e) {
     const msg = e instanceof Error ? e.message : ""
     if (msg.includes("unique") || msg.includes("duplicate")) {
@@ -81,7 +91,10 @@ export async function updateProduct(id: string, data: ProductFormInput): Promise
   }
 
   revalidatePath("/admin/products")
+  revalidatePath("/admin")
+  revalidatePath("/")
   revalidatePath("/products")
+  revalidatePath(`/product/${slug}`)
   redirect("/admin/products")
 }
 
@@ -90,9 +103,16 @@ export async function toggleProductActive(formData: FormData): Promise<void> {
   const id = formData.get("id") as string
   const active = formData.get("active") === "true"
   if (!id) return
-  await getDb().update(products).set({ active }).where(eq(products.id, id))
+  const [product] = await getDb()
+    .update(products)
+    .set({ active })
+    .where(eq(products.id, id))
+    .returning({ slug: products.slug })
   revalidatePath("/admin/products")
+  revalidatePath("/admin")
+  revalidatePath("/")
   revalidatePath("/products")
+  if (product?.slug) revalidatePath(`/product/${product.slug}`)
 }
 
 export async function updateOrderStatus(
@@ -105,6 +125,7 @@ export async function updateOrderStatus(
   if (!valid.includes(status)) return { error: "Invalid status" }
 
   await getDb().update(orders).set({ status }).where(eq(orders.id, id))
+  revalidatePath("/admin")
   revalidatePath("/admin/orders")
   revalidatePath(`/admin/orders/${id}`)
 }

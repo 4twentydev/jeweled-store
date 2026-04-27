@@ -1,9 +1,13 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
 import { getAdminStats } from "@/db/queries/admin"
+import { isAdmin } from "@/lib/auth"
 import { formatCurrency } from "@/lib/utils"
 
 export default async function AdminPage() {
+  if (!(await isAdmin())) redirect("/admin/login")
+
   const stats = await getAdminStats()
 
   const cards = [

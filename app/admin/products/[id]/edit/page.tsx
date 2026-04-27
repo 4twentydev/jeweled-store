@@ -1,13 +1,16 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
 import { ProductForm } from "@/components/admin/product-form"
 import { getProductById } from "@/db/queries/admin"
+import { isAdmin } from "@/lib/auth"
 
 export default async function EditProductPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  if (!(await isAdmin())) redirect("/admin/login")
+
   const { id } = await params
   const product = await getProductById(id)
 

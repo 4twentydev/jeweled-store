@@ -20,9 +20,17 @@ export async function POST(request: Request) {
   }
 
   const { email, items } = parsed.data
+  const aggregatedItems = Array.from(
+    items
+      .reduce((map, item) => {
+        map.set(item.productId, (map.get(item.productId) ?? 0) + item.quantity)
+        return map
+      }, new Map<string, number>())
+      .entries()
+  ).map(([productId, quantity]) => ({ productId, quantity }))
   const db = getDb()
 
-  const productIds = items.map((i) => i.productId)
+  const productIds = aggregatedItems.map((i) => i.productId)
   const dbProducts = await db
     .select()
     .from(products)
@@ -30,7 +38,7 @@ export async function POST(request: Request) {
 
   const productMap = new Map(dbProducts.map((p) => [p.id, p]))
 
-  for (const item of items) {
+  for (const item of aggregatedItems) {
     const product = productMap.get(item.productId)
     if (!product) {
       return NextResponse.json(
@@ -46,7 +54,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const lineItems = items.map((item) => {
+  const lineItems = aggregatedItems.map((item) => {
     const product = productMap.get(item.productId)!
     return {
       price_data: {
@@ -69,7 +77,18 @@ export async function POST(request: Request) {
     line_items: lineItems,
     success_url: `${env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${env.NEXT_PUBLIC_APP_URL}/cart`,
-    metadata: { items: JSON.stringify(items) },
+    metadata: {
+      items: JSON.stringify(
+        aggregatedItems.map((item) => {
+          const product = productMap.get(item.productId)!
+          return {
+            productId: item.productId,
+            quantity: item.quantity,
+            priceCents: product.priceCents,
+          }
+        })
+      ),
+    },
     shipping_address_collection: { allowed_countries: ["US", "CA"] },
   })
 

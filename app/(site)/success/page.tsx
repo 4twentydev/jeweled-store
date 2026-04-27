@@ -5,7 +5,13 @@ import { useSearchParams } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
-import type { Order } from "@/types"
+
+type SuccessOrder = {
+  customerEmail: string | null
+  customerName: string | null
+  status: string
+  totalCents: number
+}
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -19,7 +25,7 @@ function SuccessContent() {
   const searchParams = useSearchParams()
   const { clearCart } = useCart()
   const sessionId = searchParams.get("session_id")
-  const [order, setOrder] = useState<Order | null>(null)
+  const [order, setOrder] = useState<SuccessOrder | null>(null)
   const [timedOut, setTimedOut] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimeRef = useRef<number>(0)
@@ -44,7 +50,7 @@ function SuccessContent() {
       try {
         const res = await fetch(`/api/orders/session/${sessionId}`)
         if (!res.ok) return
-        const data = (await res.json()) as { order: Order | null }
+        const data = (await res.json()) as { order: SuccessOrder | null }
         if (data.order) {
           setOrder(data.order)
           if (intervalRef.current) clearInterval(intervalRef.current)
@@ -76,20 +82,28 @@ function SuccessContent() {
   }
 
   if (order) {
+    const needsAttention = order.status === "cancelled"
+
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center gap-8 px-6 text-center">
         <CheckCircle className="size-12 text-foreground/60" strokeWidth={1.5} />
         <div className="space-y-2">
-          <h1 className="text-sm tracking-wide">Order Confirmed</h1>
+          <h1 className="text-sm tracking-wide">
+            {needsAttention ? "Payment Received" : "Order Confirmed"}
+          </h1>
           <p className="text-[11px] tracking-[0.2em] uppercase text-muted-foreground">
             Thank you{order.customerName ? `, ${order.customerName}` : ""}
           </p>
         </div>
-        {order.customerEmail && (
+        {needsAttention ? (
+          <p className="text-xs text-muted-foreground max-w-sm">
+            We need to review inventory before fulfillment. You&apos;ll receive an update shortly.
+          </p>
+        ) : order.customerEmail ? (
           <p className="text-xs text-muted-foreground">
             A confirmation will be sent to {order.customerEmail}
           </p>
-        )}
+        ) : null}
         <div className="border border-border/40 p-6 text-left w-full max-w-xs space-y-3">
           <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Summary</p>
           <div className="flex justify-between text-sm">

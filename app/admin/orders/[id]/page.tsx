@@ -1,8 +1,9 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { AdminShell } from "@/components/admin/shell"
 import { OrderStatusSelect } from "@/components/admin/order-status-select"
 import { getAdminOrderWithItems } from "@/db/queries/admin"
+import { isAdmin } from "@/lib/auth"
 import { formatCurrency } from "@/lib/utils"
 
 export default async function AdminOrderDetailPage({
@@ -10,6 +11,8 @@ export default async function AdminOrderDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  if (!(await isAdmin())) redirect("/admin/login")
+
   const { id } = await params
   const order = await getAdminOrderWithItems(id)
 

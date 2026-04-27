@@ -1,6 +1,7 @@
 "use client"
 
 import { useForm } from "react-hook-form"
+import { useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState, useTransition } from "react"
 import Link from "next/link"
@@ -32,9 +33,9 @@ export function ProductForm({ product }: { product?: ProductData }) {
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<ProductFormInput>({
     resolver: zodResolver(productFormSchema),
@@ -61,11 +62,13 @@ export function ProductForm({ product }: { product?: ProductData }) {
         },
   })
 
-  const nameValue = watch("name")
+  const nameValue = useWatch({ control, name: "name" })
+  const { onBlur: nameOnBlur, ...nameRegistration } = register("name")
 
-  const handleNameBlur = () => {
+  const handleNameBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    nameOnBlur(event)
     if (!isEditing) {
-      const slug = nameValue
+      const slug = (nameValue ?? "")
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "")
@@ -93,7 +96,7 @@ export function ProductForm({ product }: { product?: ProductData }) {
         <div className="col-span-2 flex flex-col gap-1.5">
           <label className={LABEL}>Name</label>
           <input
-            {...register("name")}
+            {...nameRegistration}
             onBlur={handleNameBlur}
             className={INPUT}
             placeholder="Rhinestone Zippo"

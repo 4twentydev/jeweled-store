@@ -1,12 +1,25 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { getStripe } from "@/lib/stripe"
 import { getEnv } from "@/lib/env"
 import { getDb } from "@/db"
 import { orders, orderItems, products } from "@/db/schema"
 import { and, eq, gte, inArray, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
+import { z } from "zod"
 import type Stripe from "stripe"
-import type { BatchItem } from "drizzle-orm/batch"
+
+const metadataItemsSchema = z
+  .array(
+    z.object({
+      productId: z.string().uuid(),
+      quantity: z.int().min(1),
+      priceCents: z.int().min(1),
+    })
+  )
+  .min(1)
+
+class InsufficientStockError extends Error {}
 
 export async function POST(request: Request) {
   const body = await request.text()
@@ -28,40 +41,35 @@ export async function POST(request: Request) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session
-  const db = getDb()
-
-  // Idempotency: skip if this session was already processed
-  const existing = await db
-    .select({ id: orders.id })
-    .from(orders)
-    .where(eq(orders.stripeCheckoutSessionId, session.id))
-
-  if (existing.length > 0) {
-    return NextResponse.json({ received: true })
-  }
-
-  let cartItems: Array<{ productId: string; quantity: number }>
+  let cartItems: z.infer<typeof metadataItemsSchema>
   try {
-    cartItems = JSON.parse(session.metadata?.items ?? "[]")
+    const parsedItems = metadataItemsSchema.parse(JSON.parse(session.metadata?.items ?? "[]"))
+    cartItems = Array.from(
+      parsedItems
+        .reduce((map, item) => {
+          const existing = map.get(item.productId)
+          if (existing) {
+            if (existing.priceCents !== item.priceCents) {
+              throw new Error("Conflicting item prices")
+            }
+            existing.quantity += item.quantity
+          } else {
+            map.set(item.productId, { ...item })
+          }
+          return map
+        }, new Map<string, z.infer<typeof metadataItemsSchema>[number]>())
+        .values()
+    )
   } catch {
     return NextResponse.json({ error: "Invalid session metadata" }, { status: 400 })
   }
 
-  if (cartItems.length === 0) {
-    return NextResponse.json({ error: "No items in session metadata" }, { status: 400 })
-  }
-
-  const dbProducts = await db
-    .select()
-    .from(products)
-    .where(inArray(products.id, cartItems.map((i) => i.productId)))
-
-  const productMap = new Map(dbProducts.map((p) => [p.id, p]))
-
-  let totalCents = 0
-  for (const item of cartItems) {
-    const product = productMap.get(item.productId)
-    if (product) totalCents += product.priceCents * item.quantity
+  const metadataTotalCents = cartItems.reduce(
+    (sum, item) => sum + item.priceCents * item.quantity,
+    0
+  )
+  if (typeof session.amount_total === "number" && session.amount_total !== metadataTotalCents) {
+    return NextResponse.json({ error: "Session total mismatch" }, { status: 400 })
   }
 
   const customerDetails = session.customer_details
@@ -78,42 +86,85 @@ export async function POST(request: Request) {
         }
       : undefined
 
-  // Pre-generate the order ID so we can reference it in item inserts within the same batch
+  const db = getDb()
   const orderId = randomUUID()
+  const paidProductIds = cartItems.map((i) => i.productId)
+  let productSlugs: string[] = []
 
-  const validItems = cartItems.filter((item) => productMap.has(item.productId))
+  const createOrder = async (status: "new" | "cancelled", decrementStock: boolean) => {
+    await db.transaction(async (tx) => {
+      // Idempotency: skip if this session was already processed.
+      const existing = await tx
+        .select({ id: orders.id })
+        .from(orders)
+        .where(eq(orders.stripeCheckoutSessionId, session.id))
 
-  const batchQueries: BatchItem<"pg">[] = [
-    db.insert(orders).values({
-      id: orderId,
-      stripeCheckoutSessionId: session.id,
-      stripePaymentIntentId:
-        typeof session.payment_intent === "string" ? session.payment_intent : undefined,
-      customerEmail: session.customer_email ?? undefined,
-      customerName: customerDetails?.name ?? undefined,
-      status: "new",
-      totalCents,
-      shipping,
-    }),
-    ...validItems.map((item) => {
-      const product = productMap.get(item.productId)!
-      return db.insert(orderItems).values({
-        orderId,
-        productId: item.productId,
-        quantity: item.quantity,
-        priceAtPurchase: product.priceCents,
+      if (existing.length > 0) return
+
+      const dbProducts = await tx
+        .select({ id: products.id, slug: products.slug, active: products.active })
+        .from(products)
+        .where(inArray(products.id, paidProductIds))
+
+      const productMap = new Map(dbProducts.map((p) => [p.id, p]))
+      productSlugs = dbProducts.map((p) => p.slug)
+      const allProductsExist = cartItems.every((item) => productMap.has(item.productId))
+      const allProductsActive = dbProducts.every((product) => product.active)
+      const finalStatus = allProductsExist && allProductsActive ? status : "cancelled"
+
+      if (finalStatus === "new" && decrementStock) {
+        for (const item of cartItems) {
+          const [updated] = await tx
+            .update(products)
+            .set({ stock: sql`${products.stock} - ${item.quantity}` })
+            .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
+            .returning({ id: products.id })
+
+          if (!updated) throw new InsufficientStockError()
+        }
+      }
+
+      await tx.insert(orders).values({
+        id: orderId,
+        stripeCheckoutSessionId: session.id,
+        stripePaymentIntentId:
+          typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+        customerEmail: session.customer_email ?? undefined,
+        customerName: customerDetails?.name ?? undefined,
+        status: finalStatus,
+        totalCents: metadataTotalCents,
+        shipping,
       })
-    }),
-    ...validItems.map((item) =>
-      db
-        .update(products)
-        .set({ stock: sql`${products.stock} - ${item.quantity}` })
-        // Guard: only decrement when sufficient stock remains (prevents negative stock)
-        .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
-    ),
-  ]
 
-  await db.batch(batchQueries as [BatchItem<"pg">, ...BatchItem<"pg">[]])
+      const existingItems = cartItems.filter((item) => productMap.has(item.productId))
+      if (existingItems.length > 0) {
+        await tx.insert(orderItems).values(
+          existingItems.map((item) => ({
+            orderId,
+            productId: item.productId,
+            quantity: item.quantity,
+            priceAtPurchase: item.priceCents,
+          }))
+        )
+      }
+    })
+  }
+
+  try {
+    await createOrder("new", true)
+  } catch (error) {
+    if (!(error instanceof InsufficientStockError)) throw error
+    await createOrder("cancelled", false)
+  }
+
+  revalidatePath("/")
+  revalidatePath("/products")
+  revalidatePath("/admin")
+  revalidatePath("/admin/orders")
+  revalidatePath("/admin/products")
+  for (const slug of productSlugs) {
+    revalidatePath(`/product/${slug}`)
+  }
 
   return NextResponse.json({ received: true })
 }

@@ -1,6 +1,8 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
 import { getAllOrders } from "@/db/queries/admin"
+import { isAdmin } from "@/lib/auth"
 import { formatCurrency, cn } from "@/lib/utils"
 
 const STATUS_COLOR: Record<string, string> = {
@@ -13,6 +15,8 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 export default async function AdminOrdersPage() {
+  if (!(await isAdmin())) redirect("/admin/login")
+
   const orders = await getAllOrders()
 
   return (

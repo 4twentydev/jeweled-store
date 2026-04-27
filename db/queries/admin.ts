@@ -1,6 +1,6 @@
 import { getDb } from "@/db"
 import { products, orders } from "@/db/schema"
-import { eq, desc } from "drizzle-orm"
+import { count, desc, eq, sum } from "drizzle-orm"
 
 export async function getAllProducts() {
   return getDb().select().from(products).orderBy(desc(products.createdAt))
@@ -30,14 +30,24 @@ export async function getAdminOrderWithItems(id: string) {
 }
 
 export async function getAdminStats() {
-  const [allProducts, allOrders] = await Promise.all([
-    getDb().select().from(products),
-    getDb().select().from(orders),
+  const [productStats, activeProductStats, orderStats] = await Promise.all([
+    getDb().select({ totalProducts: count() }).from(products),
+    getDb()
+      .select({ activeProducts: count() })
+      .from(products)
+      .where(eq(products.active, true)),
+    getDb()
+      .select({
+        totalOrders: count(),
+        totalRevenueCents: sum(orders.totalCents),
+      })
+      .from(orders),
   ])
+
   return {
-    totalProducts: allProducts.length,
-    activeProducts: allProducts.filter((p) => p.active).length,
-    totalOrders: allOrders.length,
-    totalRevenueCents: allOrders.reduce((sum, o) => sum + o.totalCents, 0),
+    totalProducts: productStats[0]?.totalProducts ?? 0,
+    activeProducts: activeProductStats[0]?.activeProducts ?? 0,
+    totalOrders: orderStats[0]?.totalOrders ?? 0,
+    totalRevenueCents: Number(orderStats[0]?.totalRevenueCents ?? 0),
   }
 }

@@ -1,10 +1,14 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
 import { getAllProducts } from "@/db/queries/admin"
 import { toggleProductActive } from "@/server/actions/admin"
+import { isAdmin } from "@/lib/auth"
 import { formatCurrency, cn } from "@/lib/utils"
 
 export default async function AdminProductsPage() {
+  if (!(await isAdmin())) redirect("/admin/login")
+
   const products = await getAllProducts()
 
   return (
