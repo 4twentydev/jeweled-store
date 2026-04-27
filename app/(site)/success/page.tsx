@@ -22,7 +22,7 @@ function SuccessContent() {
   const [order, setOrder] = useState<Order | null>(null)
   const [timedOut, setTimedOut] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const startTimeRef = useRef(Date.now())
+  const startTimeRef = useRef<number>(0)
 
   useEffect(() => {
     clearCart()
@@ -31,6 +31,7 @@ function SuccessContent() {
   useEffect(() => {
     if (!sessionId) return
 
+    startTimeRef.current = Date.now()
     const MAX_WAIT_MS = 30_000
     const POLL_MS = 2_000
 
@@ -117,7 +118,7 @@ function SuccessContent() {
         <div className="space-y-2">
           <h1 className="text-sm tracking-wide">Payment Received</h1>
           <p className="text-xs text-muted-foreground max-w-sm">
-            Your payment was successful. We're finalizing your order and you'll receive a
+            Your payment was successful. We&apos;re finalizing your order and you&apos;ll receive a
             confirmation email shortly.
           </p>
         </div>

@@ -105,7 +105,7 @@ export default function CheckoutPage() {
             </button>
 
             <p className="text-[10px] text-muted-foreground/60 text-center">
-              You'll be redirected to Stripe's secure checkout.
+              You&apos;ll be redirected to Stripe&apos;s secure checkout.
             </p>
           </form>
 

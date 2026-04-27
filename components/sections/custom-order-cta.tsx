@@ -29,7 +29,7 @@ export function CustomOrderCta() {
           </h2>
           <p className="text-sm text-muted-foreground mb-12 max-w-xs leading-relaxed">
             Bring your own object or describe your vision. We apply every stone by hand
-            until it's exactly what you imagined.
+            until it&apos;s exactly what you imagined.
           </p>
           <Link
             href="/custom"

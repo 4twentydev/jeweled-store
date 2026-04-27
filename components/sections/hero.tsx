@@ -61,7 +61,7 @@ export function Hero() {
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.32 }}
           >
             <Link
-              href="/shop"
+              href="/products"
               className="group inline-flex items-center gap-3 text-[11px] tracking-[0.28em] uppercase text-foreground"
             >
               <span className="relative">

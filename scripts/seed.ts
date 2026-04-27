@@ -8,6 +8,11 @@ const sql = neon(process.env.DATABASE_URL!)
 const db = drizzle(sql, { schema })
 
 async function seed() {
+  if (process.env.NODE_ENV === "production") {
+    console.error("ERROR: seed must not run against production. Aborting.")
+    process.exit(1)
+  }
+
   console.log("Seeding products from seed-products.json...")
 
   await db.delete(schema.products)

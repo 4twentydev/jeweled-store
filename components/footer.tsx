@@ -1,10 +1,10 @@
 import Link from "next/link"
 
 const SHOP_LINKS = [
-  { label: "Lighters", href: "/shop?category=lighters" },
-  { label: "Lighter Cases", href: "/shop?category=lighter-cases" },
-  { label: "Small Cases", href: "/shop?category=small-cases" },
-  { label: "Beauty", href: "/shop?category=beauty" },
+  { label: "Lighters", href: "/products?category=lighters" },
+  { label: "Lighter Cases", href: "/products?category=lighter-cases" },
+  { label: "Small Cases", href: "/products?category=small-cases" },
+  { label: "Beauty", href: "/products?category=beauty" },
 ]
 
 const SERVICE_LINKS = [

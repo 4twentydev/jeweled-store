@@ -33,7 +33,7 @@ export function Header() {
 
         {/* Desktop nav — centre */}
         <div className="hidden md:flex items-center gap-8">
-          <NavLink href="/shop">Shop</NavLink>
+          <NavLink href="/products">Shop</NavLink>
           <NavLink href="/custom">Custom</NavLink>
           <NavLink href="/about">About</NavLink>
         </div>

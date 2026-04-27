@@ -3,8 +3,10 @@ import { getStripe } from "@/lib/stripe"
 import { getEnv } from "@/lib/env"
 import { getDb } from "@/db"
 import { orders, orderItems, products } from "@/db/schema"
-import { eq, inArray, sql } from "drizzle-orm"
+import { and, eq, gte, inArray, sql } from "drizzle-orm"
+import { randomUUID } from "crypto"
 import type Stripe from "stripe"
+import type { BatchItem } from "drizzle-orm/batch"
 
 export async function POST(request: Request) {
   const body = await request.text()
@@ -76,9 +78,14 @@ export async function POST(request: Request) {
         }
       : undefined
 
-  const [order] = await db
-    .insert(orders)
-    .values({
+  // Pre-generate the order ID so we can reference it in item inserts within the same batch
+  const orderId = randomUUID()
+
+  const validItems = cartItems.filter((item) => productMap.has(item.productId))
+
+  const batchQueries: BatchItem<"pg">[] = [
+    db.insert(orders).values({
+      id: orderId,
       stripeCheckoutSessionId: session.id,
       stripePaymentIntentId:
         typeof session.payment_intent === "string" ? session.payment_intent : undefined,
@@ -87,25 +94,26 @@ export async function POST(request: Request) {
       status: "new",
       totalCents,
       shipping,
-    })
-    .returning({ id: orders.id })
+    }),
+    ...validItems.map((item) => {
+      const product = productMap.get(item.productId)!
+      return db.insert(orderItems).values({
+        orderId,
+        productId: item.productId,
+        quantity: item.quantity,
+        priceAtPurchase: product.priceCents,
+      })
+    }),
+    ...validItems.map((item) =>
+      db
+        .update(products)
+        .set({ stock: sql`${products.stock} - ${item.quantity}` })
+        // Guard: only decrement when sufficient stock remains (prevents negative stock)
+        .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
+    ),
+  ]
 
-  for (const item of cartItems) {
-    const product = productMap.get(item.productId)
-    if (!product) continue
-
-    await db.insert(orderItems).values({
-      orderId: order.id,
-      productId: item.productId,
-      quantity: item.quantity,
-      priceAtPurchase: product.priceCents,
-    })
-
-    await db
-      .update(products)
-      .set({ stock: sql`${products.stock} - ${item.quantity}` })
-      .where(eq(products.id, item.productId))
-  }
+  await db.batch(batchQueries as [BatchItem<"pg">, ...BatchItem<"pg">[]])
 
   return NextResponse.json({ received: true })
 }
