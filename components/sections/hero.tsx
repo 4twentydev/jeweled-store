@@ -1,20 +1,24 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 export function Hero() {
   return (
     <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
-      {/* Atmospheric background */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 90% 55% at 65% 35%, rgba(255,255,255,0.022) 0%, transparent 60%), #050505",
-        }}
+      {/* Hero background image */}
+      <Image
+        src="/hero.png"
+        alt=""
+        fill
+        priority
+        className="object-cover object-center"
+        sizes="100vw"
       />
+      {/* Dark overlay for text legibility */}
+      <div className="absolute inset-0 bg-black/55" />
 
       {/* Giant typographic watermark */}
       <div
