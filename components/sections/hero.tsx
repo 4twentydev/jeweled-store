@@ -20,23 +20,6 @@ export function Hero() {
       {/* Dark overlay for text legibility */}
       <div className="absolute inset-0 bg-black/55" />
 
-      {/* Giant typographic watermark */}
-      <div
-        className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none"
-        aria-hidden
-      >
-        <span
-          className="font-light uppercase text-foreground leading-none"
-          style={{
-            fontSize: "clamp(130px, 26vw, 420px)",
-            letterSpacing: "0.22em",
-            opacity: 0.022,
-          }}
-        >
-          jwld
-        </span>
-      </div>
-
       {/* Content — bottom-left anchored */}
       <div className="relative z-10 mt-auto max-w-[1400px] mx-auto w-full px-6 lg:px-12 pb-24 md:pb-36">
         <div className="max-w-[560px]">
@@ -66,15 +49,9 @@ export function Hero() {
           >
             <Link
               href="/products"
-              className="group inline-flex items-center gap-3 text-[11px] tracking-[0.28em] uppercase text-foreground"
+              className="group inline-flex items-center gap-3 px-7 py-3.5 text-[11px] tracking-[0.28em] uppercase bg-foreground text-background hover:opacity-80 transition-opacity duration-300"
             >
-              <span className="relative">
-                Shop the Collection
-                <span
-                  className="absolute bottom-0 left-0 w-full h-px opacity-90 group-hover:opacity-50 transition-opacity duration-300"
-                  style={{ backgroundColor: "var(--jwld-accent)" }}
-                />
-              </span>
+              Shop the Collection
               <ArrowRight className="size-3 transition-transform duration-300 group-hover:translate-x-1.5" />
             </Link>
           </motion.div>

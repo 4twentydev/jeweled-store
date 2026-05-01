@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun run *)",
+      "Read(//tmp/**)",
+      "Bash(kill %1)",
+      "Bash(bun db:seed *)",
+      "Bash(bun typecheck *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(xargs cat *)"
+    ]
+  }
+}
