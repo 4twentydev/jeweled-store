@@ -8,6 +8,7 @@ import Link from "next/link"
 import { productFormSchema, type ProductFormInput, PRODUCT_CATEGORIES } from "@/lib/validators"
 import { createProduct, updateProduct } from "@/server/actions/admin"
 import { cn } from "@/lib/utils"
+import { ImageUploader } from "@/components/admin/image-uploader"
 
 type ProductData = {
   id: string
@@ -19,6 +20,7 @@ type ProductData = {
   stock: number
   featured: boolean
   active: boolean
+  images: string[]
 }
 
 const INPUT =
@@ -49,6 +51,7 @@ export function ProductForm({ product }: { product?: ProductData }) {
           stock: product.stock,
           featured: product.featured,
           active: product.active,
+          images: product.images,
         }
       : {
           name: "",
@@ -59,6 +62,7 @@ export function ProductForm({ product }: { product?: ProductData }) {
           stock: 0,
           featured: false,
           active: true,
+          images: [],
         },
   })
 
@@ -158,6 +162,8 @@ export function ProductForm({ product }: { product?: ProductData }) {
           />
           {errors.stock && <span className={ERROR}>{errors.stock.message}</span>}
         </div>
+
+        <ImageUploader control={control} />
 
         <div className="col-span-2 flex flex-col gap-3 pt-1">
           <label className="flex items-center gap-3 cursor-pointer">

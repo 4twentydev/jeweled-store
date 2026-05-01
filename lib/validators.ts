@@ -21,6 +21,7 @@ export const productFormSchema = z.object({
   stock: z.int().min(0, "Stock cannot be negative"),
   featured: z.boolean(),
   active: z.boolean(),
+  images: z.array(z.string().url()),
 })
 
 export type ProductFormInput = z.infer<typeof productFormSchema>

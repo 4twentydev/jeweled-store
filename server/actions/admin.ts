@@ -21,7 +21,7 @@ export async function createProduct(data: ProductFormInput): Promise<ActionResul
   const parsed = productFormSchema.safeParse(data)
   if (!parsed.success) return { error: "Invalid input" }
 
-  const { name, slug, description, category, priceInDollars, stock, featured, active } =
+  const { name, slug, description, category, priceInDollars, stock, featured, active, images } =
     parsed.data
 
   try {
@@ -34,7 +34,7 @@ export async function createProduct(data: ProductFormInput): Promise<ActionResul
       stock,
       featured,
       active,
-      images: [],
+      images,
     })
   } catch (e) {
     const msg = e instanceof Error ? e.message : ""
@@ -58,7 +58,7 @@ export async function updateProduct(id: string, data: ProductFormInput): Promise
   const parsed = productFormSchema.safeParse(data)
   if (!parsed.success) return { error: "Invalid input" }
 
-  const { name, slug, description, category, priceInDollars, stock, featured, active } =
+  const { name, slug, description, category, priceInDollars, stock, featured, active, images } =
     parsed.data
 
   try {
@@ -78,6 +78,7 @@ export async function updateProduct(id: string, data: ProductFormInput): Promise
         stock,
         featured,
         active,
+        images,
       })
       .where(eq(products.id, id))
 
