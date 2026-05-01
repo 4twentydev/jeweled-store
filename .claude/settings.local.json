@@ -12,7 +12,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(xargs cat *)",
-      "Bash(bun add *)"
+      "Bash(bun add *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(node -e \"const {put} = require\\('/home/brandon/Projects/jeweled-store/jeweled-store/node_modules/@vercel/blob'\\); console.log\\('ok'\\)\")"
     ]
   }
 }

@@ -30,11 +30,16 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
 
       try {
         const res = await fetch("/api/admin/upload", { method: "POST", body: form })
-        if (!res.ok) throw new Error()
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          console.error("[upload]", res.status, body)
+          throw new Error()
+        }
         const { url } = (await res.json()) as { url: string }
         field.onChange([...images, url])
         setEntries((prev) => prev.filter((e) => e.id !== id))
-      } catch {
+      } catch (err) {
+        console.error("[upload] failed:", err)
         setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, status: "error" } : e)))
       }
     }
@@ -62,17 +67,20 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
         {entries.map(({ id, status }) => (
           <div
             key={id}
-            className="w-24 h-24 border border-border flex items-center justify-center relative"
+            className="w-24 h-24 border flex items-center justify-center relative text-center px-1"
+            style={{ borderColor: status === "error" ? "var(--destructive)" : undefined }}
           >
             {status === "uploading" ? (
               <span className="text-[10px] text-muted-foreground">Uploading…</span>
             ) : (
               <>
-                <span className="text-[10px] text-destructive">Failed</span>
+                <span className="text-[11px] text-destructive font-medium leading-tight">
+                  Upload failed
+                </span>
                 <button
                   type="button"
                   onClick={() => setEntries((prev) => prev.filter((e) => e.id !== id))}
-                  className="absolute top-0 right-0 w-5 h-5 bg-black/70 text-white text-xs flex items-center justify-center cursor-pointer"
+                  className="absolute top-0 right-0 w-5 h-5 bg-destructive text-white text-xs flex items-center justify-center cursor-pointer"
                   aria-label="Dismiss"
                 >
                   ×
