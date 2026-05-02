@@ -50,6 +50,14 @@ export const customRequestSchema = z.object({
 
 export type CustomRequestInput = z.infer<typeof customRequestSchema>
 
+export const customRequestAdminSchema = z.object({
+  status: z.enum(["pending", "quoted", "paid", "prep", "assembly", "shipping", "shipped", "cancelled"]),
+  quotedPriceInDollars: z.number().min(0).optional(),
+  stripePaymentLinkId: z.string().trim().optional(),
+})
+
+export type CustomRequestAdminInput = z.infer<typeof customRequestAdminSchema>
+
 export const adminLoginSchema = z.object({
   password: z.string().min(1),
 })

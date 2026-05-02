@@ -1,6 +1,6 @@
 import { getDb } from "@/db"
 import { products } from "@/db/schema"
-import { eq, and } from "drizzle-orm"
+import { eq, and, ne } from "drizzle-orm"
 
 export async function getProducts() {
   return getDb().select().from(products).where(eq(products.active, true))
@@ -27,4 +27,12 @@ export async function getProductBySlug(slug: string) {
     .from(products)
     .where(and(eq(products.slug, slug), eq(products.active, true)))
   return product ?? null
+}
+
+export async function getRelatedProducts(category: string, excludeId: string, limit = 4) {
+  return getDb()
+    .select()
+    .from(products)
+    .where(and(eq(products.active, true), eq(products.category, category), ne(products.id, excludeId)))
+    .limit(limit)
 }

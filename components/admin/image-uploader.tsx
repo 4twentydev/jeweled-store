@@ -14,6 +14,10 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
   const { field, fieldState } = useController({ name: "images", control })
   const [entries, setEntries] = useState<UploadEntry[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  // Keep a ref so async callbacks always read the latest field value, not the
+  // render-cycle snapshot captured when handleFiles was created.
+  const fieldRef = useRef(field)
+  fieldRef.current = field
 
   const images = (field.value as string[]) ?? []
 
@@ -36,7 +40,8 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
           throw new Error()
         }
         const { url } = (await res.json()) as { url: string }
-        field.onChange([...images, url])
+        const current = (fieldRef.current.value as string[]) ?? []
+        fieldRef.current.onChange([...current, url])
         setEntries((prev) => prev.filter((e) => e.id !== id))
       } catch (err) {
         console.error("[upload] failed:", err)

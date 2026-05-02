@@ -51,6 +51,12 @@ export default async function AdminPage() {
           >
             View Orders →
           </Link>
+          <Link
+            href="/admin/custom-requests"
+            className="text-[10px] tracking-[0.2em] uppercase border border-border px-4 py-2.5 hover:border-foreground/40 transition-colors"
+          >
+            Review Custom →
+          </Link>
         </div>
       </div>
     </AdminShell>

@@ -1,6 +1,6 @@
 import { getDb } from "@/db"
-import { products, orders } from "@/db/schema"
-import { count, desc, eq, sum } from "drizzle-orm"
+import { products, orders, customRequests } from "@/db/schema"
+import { count, desc, eq, ne, sum } from "drizzle-orm"
 
 export async function getAllProducts() {
   return getDb().select().from(products).orderBy(desc(products.createdAt))
@@ -29,8 +29,20 @@ export async function getAdminOrderWithItems(id: string) {
   return result ?? null
 }
 
+export async function getAllCustomRequests() {
+  return getDb().select().from(customRequests).orderBy(desc(customRequests.createdAt))
+}
+
+export async function getCustomRequestById(id: string) {
+  const [request] = await getDb()
+    .select()
+    .from(customRequests)
+    .where(eq(customRequests.id, id))
+  return request ?? null
+}
+
 export async function getAdminStats() {
-  const [productStats, activeProductStats, orderStats] = await Promise.all([
+  const [productStats, activeProductStats, orderStats, revenueStats] = await Promise.all([
     getDb().select({ totalProducts: count() }).from(products),
     getDb()
       .select({ activeProducts: count() })
@@ -39,15 +51,20 @@ export async function getAdminStats() {
     getDb()
       .select({
         totalOrders: count(),
-        totalRevenueCents: sum(orders.totalCents),
       })
       .from(orders),
+    getDb()
+      .select({
+        totalRevenueCents: sum(orders.totalCents),
+      })
+      .from(orders)
+      .where(ne(orders.status, "cancelled")),
   ])
 
   return {
     totalProducts: productStats[0]?.totalProducts ?? 0,
     activeProducts: activeProductStats[0]?.activeProducts ?? 0,
     totalOrders: orderStats[0]?.totalOrders ?? 0,
-    totalRevenueCents: Number(orderStats[0]?.totalRevenueCents ?? 0),
+    totalRevenueCents: Number(revenueStats[0]?.totalRevenueCents ?? 0),
   }
 }

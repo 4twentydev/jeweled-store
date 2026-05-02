@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/products", label: "Products", exact: false },
   { href: "/admin/orders", label: "Orders", exact: false },
+  { href: "/admin/custom-requests", label: "Custom", exact: false },
 ]
 
 export function AdminNav() {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { getDb } from "@/db"
 import { customRequests } from "@/db/schema"
 import { customRequestSchema } from "@/lib/validators"
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
     budgetRange,
     referenceImages,
   })
+
+  revalidatePath("/admin")
+  revalidatePath("/admin/custom-requests")
 
   return NextResponse.json({ ok: true }, { status: 201 })
 }

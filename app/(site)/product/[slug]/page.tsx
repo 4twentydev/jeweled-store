@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
-import { getProductBySlug } from "@/db/queries/products"
+import { getProductBySlug, getRelatedProducts } from "@/db/queries/products"
 import { AddToCart } from "@/components/cart/add-to-cart"
+import { ProductCard } from "@/components/product-card"
+import { ProductDetailAccordions } from "@/components/product-detail-accordions"
+import { ProductGallery } from "@/components/product-gallery"
 
 const GRADIENT_MAP: Record<string, string> = {
   "bejeweled-lighters":
@@ -66,10 +68,10 @@ export default async function ProductPage({
 
   const bg = GRADIENT_MAP[product.category] ?? FALLBACK_BG
   const categoryLabel = CATEGORY_LABEL[product.category] ?? product.category
-  const firstImage = product.images[0]
+  const relatedProducts = await getRelatedProducts(product.category, product.id)
 
   return (
-    <div className="min-h-screen px-6 lg:px-12 py-24 md:py-32">
+    <div className="min-h-screen px-6 lg:px-12 pt-24 pb-32 md:py-32">
       <div className="max-w-[1400px] mx-auto">
         {/* Breadcrumb */}
         <nav className="mb-12 flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
@@ -88,19 +90,7 @@ export default async function ProductPage({
         </nav>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-          {/* Product image */}
-          <div className="relative aspect-square w-full" style={{ background: bg }}>
-            {firstImage && (
-              <Image
-                src={firstImage}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-                priority
-              />
-            )}
-          </div>
+          <ProductGallery images={product.images} name={product.name} background={bg} />
 
           {/* Product info */}
           <div className="flex flex-col">
@@ -117,6 +107,10 @@ export default async function ProductPage({
             <p className="text-sm text-foreground/70 leading-relaxed mb-8 max-w-md">
               {product.description}
             </p>
+
+            <div className="mb-8 max-w-md">
+              <ProductDetailAccordions category={product.category} />
+            </div>
 
             {product.stock === 0 ? (
               <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
@@ -137,6 +131,31 @@ export default async function ProductPage({
             )}
           </div>
         </div>
+
+        {relatedProducts.length > 0 && (
+          <section className="mt-24 md:mt-32">
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-2">
+                  Complementary Pieces
+                </p>
+                <h2 className="text-lg font-light tracking-tight">Also in {categoryLabel}</h2>
+              </div>
+              <Link
+                href={`/products?category=${product.category}`}
+                className="hidden md:inline text-[10px] tracking-[0.22em] uppercase text-foreground/50 hover:text-foreground transition-colors"
+              >
+                View Category
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+              {relatedProducts.map((related) => (
+                <ProductCard key={related.id} product={related} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )

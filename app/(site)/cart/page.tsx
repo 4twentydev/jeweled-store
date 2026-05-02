@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { Minus, Plus, X, ShoppingBag } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
@@ -42,7 +43,17 @@ export default function CartPage() {
           <ul className="divide-y divide-border/30">
             {items.map((item) => (
               <li key={item.productId} className="py-8 flex gap-6">
-                <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 bg-[#1a1a1a]" />
+                <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 overflow-hidden bg-[#1a1a1a]">
+                  {item.image && (
+                    <Image
+                      src={item.image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 768px) 80px, 96px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between gap-4">

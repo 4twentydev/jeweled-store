@@ -27,6 +27,9 @@ export default function CustomPage() {
       customerEmail: (form.elements.namedItem("email") as HTMLInputElement).value,
       itemDescription: (form.elements.namedItem("description") as HTMLTextAreaElement).value,
       budgetRange: (form.elements.namedItem("budget") as HTMLSelectElement).value,
+      referenceImages: Array.from(form.querySelectorAll<HTMLInputElement>("[data-reference-image]"))
+        .map((input) => input.value.trim())
+        .filter(Boolean),
     }
 
     try {
@@ -37,8 +40,8 @@ export default function CustomPage() {
       })
 
       if (!res.ok) {
-        const json = (await res.json()) as { error?: string }
-        setError(json.error ?? "Something went wrong. Please try again.")
+        const json = (await res.json()) as { error?: unknown }
+        setError(typeof json.error === "string" ? json.error : "Please check the form and try again.")
         setLoading(false)
         return
       }
@@ -151,6 +154,24 @@ export default function CustomPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <p className="block text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                  Reference Images
+                </p>
+                <div className="space-y-3">
+                  {[0, 1, 2].map((i) => (
+                    <input
+                      key={i}
+                      data-reference-image
+                      type="url"
+                      inputMode="url"
+                      placeholder={i === 0 ? "https://..." : "Optional image URL"}
+                      className="w-full bg-transparent border border-border/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-foreground/50 transition-colors"
+                    />
+                  ))}
+                </div>
               </div>
 
               {error && <p className="text-xs text-red-400">{error}</p>}

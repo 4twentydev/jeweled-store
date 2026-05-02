@@ -13,6 +13,8 @@ function isUniqueConstraintViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && "code" in err && (err as { code: unknown }).code === "23505"
 }
 
+class StockDecrementFailedError extends Error {}
+
 const metadataItemsSchema = z
   .array(
     z.object({
@@ -124,65 +126,104 @@ export async function POST(request: Request) {
   const orderStatus = canFulfill ? ("new" as const) : ("cancelled" as const)
   const existingItems = cartItems.filter((item) => productMap.has(item.productId))
 
-  // db.batch() on Neon HTTP executes within an implicit transaction.
-  // Stock decrements use a gte guard to prevent negative stock even under concurrency.
-  const decrementQueries = canFulfill
-    ? cartItems.map((item) =>
-        db
-          .update(products)
-          .set({ stock: sql`${products.stock} - ${item.quantity}` })
-          .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
-          .returning({ id: products.id })
-      )
-    : []
+  const orderItemValues = existingItems.map((item) => ({
+    orderId,
+    productId: item.productId,
+    quantity: item.quantity,
+    priceAtPurchase: item.priceCents,
+  }))
 
-  const insertOrderQuery = db.insert(orders).values({
-    id: orderId,
-    stripeCheckoutSessionId: session.id,
-    stripePaymentIntentId:
-      typeof session.payment_intent === "string" ? session.payment_intent : undefined,
-    customerEmail: session.customer_email ?? undefined,
-    customerName: customerDetails?.name ?? undefined,
-    status: orderStatus,
-    totalCents: metadataTotalCents,
-    shipping,
-  })
+  try {
+    if (canFulfill) {
+      await db.transaction(async (tx) => {
+        for (const item of cartItems) {
+          const decremented = await tx
+            .update(products)
+            .set({ stock: sql`${products.stock} - ${item.quantity}` })
+            .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
+            .returning({ id: products.id })
 
-  const insertItemsQueries =
-    existingItems.length > 0
-      ? [
-          db.insert(orderItems).values(
+          if (decremented.length === 0) {
+            throw new StockDecrementFailedError()
+          }
+        }
+
+        await tx.insert(orders).values({
+          id: orderId,
+          stripeCheckoutSessionId: session.id,
+          stripePaymentIntentId:
+            typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          customerEmail: session.customer_email ?? undefined,
+          customerName: customerDetails?.name ?? undefined,
+          status: "new",
+          totalCents: metadataTotalCents,
+          shipping,
+        })
+
+        if (existingItems.length > 0) {
+          await tx.insert(orderItems).values(
             existingItems.map((item) => ({
               orderId,
               productId: item.productId,
               quantity: item.quantity,
               priceAtPurchase: item.priceCents,
             }))
-          ),
-        ]
-      : []
+          )
+        }
+      })
+    } else {
+      await db.transaction(async (tx) => {
+        await tx.insert(orders).values({
+          id: orderId,
+          stripeCheckoutSessionId: session.id,
+          stripePaymentIntentId:
+            typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          customerEmail: session.customer_email ?? undefined,
+          customerName: customerDetails?.name ?? undefined,
+          status: orderStatus,
+          totalCents: metadataTotalCents,
+          shipping,
+        })
 
-  let batchResults: Awaited<ReturnType<typeof db.batch>>
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    batchResults = await db.batch([...decrementQueries, insertOrderQuery, ...insertItemsQueries] as [any, ...any[]])
-  } catch (err) {
-    // PostgreSQL unique_violation (23505) on stripe_checkout_session_id means a
-    // concurrent delivery already committed this session. Return 200 so Stripe
-    // does not keep retrying.
-    if (isUniqueConstraintViolation(err)) {
-      return NextResponse.json({ received: true })
+        if (orderItemValues.length > 0) {
+          await tx.insert(orderItems).values(orderItemValues)
+        }
+      })
     }
-    throw err
-  }
+  } catch (err) {
+    if (err instanceof StockDecrementFailedError) {
+      try {
+        await db.transaction(async (tx) => {
+          await tx.insert(orders).values({
+            id: orderId,
+            stripeCheckoutSessionId: session.id,
+            stripePaymentIntentId:
+              typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+            customerEmail: session.customer_email ?? undefined,
+            customerName: customerDetails?.name ?? undefined,
+            status: "cancelled",
+            totalCents: metadataTotalCents,
+            shipping,
+          })
 
-  // Verify every stock decrement actually hit a row. If the gte guard fired for any
-  // item (concurrent checkout won the race), flip this order to cancelled immediately.
-  if (canFulfill) {
-    const decrementResults = batchResults.slice(0, decrementQueries.length) as Array<Array<{ id: string }>>
-    const anyFailed = decrementResults.some((rows) => rows.length === 0)
-    if (anyFailed) {
-      await db.update(orders).set({ status: "cancelled" }).where(eq(orders.id, orderId))
+          if (orderItemValues.length > 0) {
+            await tx.insert(orderItems).values(orderItemValues)
+          }
+        })
+      } catch (insertErr) {
+        if (isUniqueConstraintViolation(insertErr)) {
+          return NextResponse.json({ received: true })
+        }
+        throw insertErr
+      }
+    } else {
+      // PostgreSQL unique_violation (23505) on stripe_checkout_session_id means a
+      // concurrent delivery already committed this session. Return 200 so Stripe
+      // does not keep retrying.
+      if (isUniqueConstraintViolation(err)) {
+        return NextResponse.json({ received: true })
+      }
+      throw err
     }
   }
 

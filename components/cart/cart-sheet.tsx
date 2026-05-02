@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import Image from "next/image"
 import Link from "next/link"
 import { X, Minus, Plus, ShoppingBag } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
@@ -96,7 +97,17 @@ export function CartSheet() {
                 <ul className="divide-y divide-border/30">
                   {items.map((item) => (
                     <li key={item.productId} className="px-6 py-5 flex gap-4">
-                      <div className="w-16 h-16 shrink-0 bg-[#1a1a1a]" />
+                      <div className="relative w-16 h-16 shrink-0 overflow-hidden bg-[#1a1a1a]">
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt=""
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
 
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-foreground/90 leading-snug truncate">

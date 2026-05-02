@@ -52,13 +52,15 @@ export function AddToCart({ product }: Props) {
         </button>
       </div>
 
-      <button
-        onClick={handleAdd}
-        className="flex items-center justify-center gap-3 w-full max-w-md py-3.5 text-[11px] tracking-[0.3em] uppercase bg-foreground text-background hover:bg-foreground/90 transition-colors"
-      >
-        <ShoppingBag className="size-3.5" />
-        Add to Bag
-      </button>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/40 bg-background/95 p-4 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+        <button
+          onClick={handleAdd}
+          className="flex items-center justify-center gap-3 w-full max-w-md mx-auto md:mx-0 py-3.5 text-[11px] tracking-[0.3em] uppercase bg-foreground text-background hover:bg-foreground/90 transition-colors"
+        >
+          <ShoppingBag className="size-3.5" />
+          Add to Bag
+        </button>
+      </div>
     </div>
   )
 }

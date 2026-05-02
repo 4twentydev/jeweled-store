@@ -4,10 +4,15 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { isAdmin, clearAdminCookie } from "@/lib/auth"
 import { getDb } from "@/db"
-import { products, orders } from "@/db/schema"
+import { products, orders, customRequests } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { productFormSchema, type ProductFormInput } from "@/lib/validators"
-import type { OrderStatus } from "@/db/schema"
+import {
+  customRequestAdminSchema,
+  productFormSchema,
+  type CustomRequestAdminInput,
+  type ProductFormInput,
+} from "@/lib/validators"
+import type { CustomRequestStatus, OrderStatus } from "@/db/schema"
 
 type ActionResult = { error: string } | undefined
 
@@ -129,6 +134,34 @@ export async function updateOrderStatus(
   revalidatePath("/admin")
   revalidatePath("/admin/orders")
   revalidatePath(`/admin/orders/${id}`)
+}
+
+export async function updateCustomRequest(
+  id: string,
+  data: CustomRequestAdminInput
+): Promise<ActionResult> {
+  await requireAdmin()
+
+  const parsed = customRequestAdminSchema.safeParse(data)
+  if (!parsed.success) return { error: "Invalid input" }
+
+  const { status, quotedPriceInDollars, stripePaymentLinkId } = parsed.data
+
+  await getDb()
+    .update(customRequests)
+    .set({
+      status: status as CustomRequestStatus,
+      quotedPrice:
+        typeof quotedPriceInDollars === "number"
+          ? Math.round(quotedPriceInDollars * 100)
+          : null,
+      stripePaymentLinkId: stripePaymentLinkId || null,
+    })
+    .where(eq(customRequests.id, id))
+
+  revalidatePath("/admin")
+  revalidatePath("/admin/custom-requests")
+  revalidatePath(`/admin/custom-requests/${id}`)
 }
 
 export async function adminLogout(): Promise<void> {
