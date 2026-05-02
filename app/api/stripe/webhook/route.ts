@@ -126,6 +126,7 @@ export async function POST(request: Request) {
           .update(products)
           .set({ stock: sql`${products.stock} - ${item.quantity}` })
           .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
+          .returning({ id: products.id })
       )
     : []
 
@@ -156,7 +157,17 @@ export async function POST(request: Request) {
       : []
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await db.batch([...decrementQueries, insertOrderQuery, ...insertItemsQueries] as [any, ...any[]])
+  const batchResults = await db.batch([...decrementQueries, insertOrderQuery, ...insertItemsQueries] as [any, ...any[]])
+
+  // Verify every stock decrement actually hit a row. If the gte guard fired for any
+  // item (concurrent checkout won the race), flip this order to cancelled immediately.
+  if (canFulfill) {
+    const decrementResults = batchResults.slice(0, decrementQueries.length) as Array<Array<{ id: string }>>
+    const anyFailed = decrementResults.some((rows) => rows.length === 0)
+    if (anyFailed) {
+      await db.update(orders).set({ status: "cancelled" }).where(eq(orders.id, orderId))
+    }
+  }
 
   revalidatePath("/")
   revalidatePath("/products")
