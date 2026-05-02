@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import type { Product } from "@/types"
 import { QuickAdd } from "@/components/cart/quick-add"
@@ -49,15 +50,26 @@ export function ProductCard({ product }: Props) {
         ? "Low Stock"
         : undefined
 
+  const firstImage = product.images[0]
+
   return (
     <Link href={`/product/${product.slug}`} className="group block">
       <div
         className="relative aspect-square overflow-hidden mb-4"
         style={{ background: bg }}
       >
+        {firstImage && (
+          <Image
+            src={firstImage}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className="object-cover"
+          />
+        )}
         {badge && (
           <span
-            className="absolute top-3 left-3 text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 border"
+            className="absolute top-3 left-3 text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 border z-10"
             style={{
               color: "var(--jwld-accent)",
               borderColor: "var(--jwld-accent)",

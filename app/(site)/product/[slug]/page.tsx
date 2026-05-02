@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { getProductBySlug } from "@/db/queries/products"
@@ -65,6 +66,7 @@ export default async function ProductPage({
 
   const bg = GRADIENT_MAP[product.category] ?? FALLBACK_BG
   const categoryLabel = CATEGORY_LABEL[product.category] ?? product.category
+  const firstImage = product.images[0]
 
   return (
     <div className="min-h-screen px-6 lg:px-12 py-24 md:py-32">
@@ -86,8 +88,19 @@ export default async function ProductPage({
         </nav>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-          {/* Image placeholder */}
-          <div className="aspect-square w-full" style={{ background: bg }} />
+          {/* Product image */}
+          <div className="relative aspect-square w-full" style={{ background: bg }}>
+            {firstImage && (
+              <Image
+                src={firstImage}
+                alt={product.name}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
+            )}
+          </div>
 
           {/* Product info */}
           <div className="flex flex-col">
