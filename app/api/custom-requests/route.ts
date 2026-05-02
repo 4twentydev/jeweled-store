@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server"
-import { z } from "zod"
 import { getDb } from "@/db"
 import { customRequests } from "@/db/schema"
-
-const schema = z.object({
-  customerName: z.string().min(1).max(100),
-  customerEmail: z.string().email(),
-  itemDescription: z.string().min(10).max(2000),
-  budgetRange: z.string().min(1).max(50),
-})
+import { customRequestSchema } from "@/lib/validators"
 
 export async function POST(request: Request) {
   let body: unknown
@@ -18,18 +11,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 
-  const parsed = schema.safeParse(body)
+  const parsed = customRequestSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { customerName, customerEmail, itemDescription, budgetRange } = parsed.data
+  const { customerName, customerEmail, itemDescription, budgetRange, referenceImages } = parsed.data
 
   await getDb().insert(customRequests).values({
     customerName,
     customerEmail,
     itemDescription,
     budgetRange,
+    referenceImages,
   })
 
   return NextResponse.json({ ok: true }, { status: 201 })

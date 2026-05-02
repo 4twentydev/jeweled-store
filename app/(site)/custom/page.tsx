@@ -3,7 +3,13 @@
 import { useState } from "react"
 import { FadeUp } from "@/components/fade-up"
 
-const BUDGET_OPTIONS = ["Under $200", "$200–$500", "$500–$1,000", "$1,000+"]
+const BUDGET_OPTIONS = [
+  { value: "under-200", label: "Under $200" },
+  { value: "200-500", label: "$200–$500" },
+  { value: "500-1000", label: "$500–$1,000" },
+  { value: "1000-2500", label: "$1,000–$2,500" },
+  { value: "2500-plus", label: "$2,500+" },
+] satisfies { value: string; label: string }[]
 
 export default function CustomPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -140,8 +146,8 @@ export default function CustomPage() {
                 >
                   <option value="">Select a range</option>
                   {BUDGET_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
                     </option>
                   ))}
                 </select>
