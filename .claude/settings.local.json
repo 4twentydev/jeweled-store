@@ -28,7 +28,9 @@
       "Bash(curl -s https://jwld.store)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://jeweled-store-f8hhggptr-4twentydev.vercel.app)",
       "mcp__claude_ai_Vercel__get_project",
-      "mcp__claude_ai_Vercel__get_deployment_build_logs"
+      "mcp__claude_ai_Vercel__get_deployment_build_logs",
+      "Bash(rm /home/brandon/Projects/jeweled-store/jeweled-store/app/api/orders/session/[sessionId]/route.ts)",
+      "Bash(rmdir /home/brandon/Projects/jeweled-store/jeweled-store/app/api/orders/session/[sessionId])"
     ]
   }
 }
