@@ -9,6 +9,10 @@ import { randomUUID } from "crypto"
 import { z } from "zod"
 import type Stripe from "stripe"
 
+function isUniqueConstraintViolation(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "code" in err && (err as { code: unknown }).code === "23505"
+}
+
 const metadataItemsSchema = z
   .array(
     z.object({
@@ -89,7 +93,9 @@ export async function POST(request: Request) {
   const paidProductIds = cartItems.map((i) => i.productId)
   let productSlugs: string[] = []
 
-  // Idempotency: skip if this session was already processed
+  // Fast-path idempotency: skip if this session was already processed.
+  // This handles sequential retries cheaply. Concurrent duplicates that race
+  // past this check are caught by the unique-constraint error handler below.
   const [alreadyProcessed] = await db
     .select({ id: orders.id })
     .from(orders)
@@ -156,8 +162,19 @@ export async function POST(request: Request) {
         ]
       : []
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const batchResults = await db.batch([...decrementQueries, insertOrderQuery, ...insertItemsQueries] as [any, ...any[]])
+  let batchResults: Awaited<ReturnType<typeof db.batch>>
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    batchResults = await db.batch([...decrementQueries, insertOrderQuery, ...insertItemsQueries] as [any, ...any[]])
+  } catch (err) {
+    // PostgreSQL unique_violation (23505) on stripe_checkout_session_id means a
+    // concurrent delivery already committed this session. Return 200 so Stripe
+    // does not keep retrying.
+    if (isUniqueConstraintViolation(err)) {
+      return NextResponse.json({ received: true })
+    }
+    throw err
+  }
 
   // Verify every stock decrement actually hit a row. If the gte guard fired for any
   // item (concurrent checkout won the race), flip this order to cancelled immediately.
