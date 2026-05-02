@@ -15,7 +15,20 @@
       "Bash(bun add *)",
       "Bash(echo \"exit: $?\")",
       "Bash(node -e \"const {put} = require\\('/home/brandon/Projects/jeweled-store/jeweled-store/node_modules/@vercel/blob'\\); console.log\\('ok'\\)\")",
-      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")"
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(vercel --version)",
+      "Bash(vercel ls *)",
+      "Bash(vercel domains *)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel env *)",
+      "Bash(vercel logs *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://jeweled-store-awc5h5t1m-4twentydev.vercel.app)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://jwld.store)",
+      "Bash(curl -sv https://jwld.store)",
+      "Bash(curl -s https://jwld.store)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://jeweled-store-f8hhggptr-4twentydev.vercel.app)",
+      "mcp__claude_ai_Vercel__get_project",
+      "mcp__claude_ai_Vercel__get_deployment_build_logs"
     ]
   }
 }
