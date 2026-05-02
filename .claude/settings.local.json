@@ -14,7 +14,8 @@
       "Bash(xargs cat *)",
       "Bash(bun add *)",
       "Bash(echo \"exit: $?\")",
-      "Bash(node -e \"const {put} = require\\('/home/brandon/Projects/jeweled-store/jeweled-store/node_modules/@vercel/blob'\\); console.log\\('ok'\\)\")"
+      "Bash(node -e \"const {put} = require\\('/home/brandon/Projects/jeweled-store/jeweled-store/node_modules/@vercel/blob'\\); console.log\\('ok'\\)\")",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")"
     ]
   }
 }
