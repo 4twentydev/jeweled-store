@@ -76,6 +76,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      { error: "Image storage is not configured" },
+      { status: 500 }
+    )
+  }
+
   const form = await req.formData()
   const file = form.get("file") as File | null
   if (!file || !file.size) {
@@ -129,10 +136,19 @@ export async function POST(req: Request) {
   const ext = MIME_TO_EXT[declaredMime]
   const filename = `products/${crypto.randomUUID()}.${ext}`
 
-  const blob = await put(filename, file, {
-    access: "public",
-    contentType: declaredMime,
-  })
+  let blob: Awaited<ReturnType<typeof put>>
+  try {
+    blob = await put(filename, file, {
+      access: "public",
+      contentType: declaredMime,
+    })
+  } catch (err) {
+    console.error("[admin upload] blob put failed:", err)
+    return NextResponse.json(
+      { error: "Image upload failed" },
+      { status: 502 }
+    )
+  }
 
   return NextResponse.json({ url: blob.url })
 }

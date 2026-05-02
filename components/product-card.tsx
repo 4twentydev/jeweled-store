@@ -65,6 +65,7 @@ export function ProductCard({ product }: Props) {
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             className="object-cover"
+            unoptimized
           />
         )}
         {badge && (

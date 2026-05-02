@@ -105,6 +105,7 @@ export function CartSheet() {
                             fill
                             sizes="64px"
                             className="object-cover"
+                            unoptimized
                           />
                         )}
                       </div>

@@ -8,7 +8,7 @@ import type { ProductFormInput } from "@/lib/validators"
 const LABEL = "text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
 const ERROR = "text-[11px] text-destructive mt-1"
 
-type UploadEntry = { id: string; status: "uploading" | "error" }
+type UploadEntry = { id: string; status: "uploading" | "error"; message?: string }
 
 export function ImageUploader({ control }: { control: Control<ProductFormInput> }) {
   const { field, fieldState } = useController({ name: "images", control })
@@ -34,18 +34,24 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
 
       try {
         const res = await fetch("/api/admin/upload", { method: "POST", body: form })
+        const body = await res.json().catch(() => ({}))
         if (!res.ok) {
-          const body = await res.json().catch(() => ({}))
           console.error("[upload]", res.status, body)
-          throw new Error()
+          throw new Error(
+            typeof body.error === "string" ? body.error : "Upload failed"
+          )
         }
-        const { url } = (await res.json()) as { url: string }
+        const { url } = body as { url?: string }
+        if (!url) throw new Error("Upload response did not include an image URL")
         const current = (fieldRef.current.value as string[]) ?? []
         fieldRef.current.onChange([...current, url])
         setEntries((prev) => prev.filter((e) => e.id !== id))
       } catch (err) {
         console.error("[upload] failed:", err)
-        setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, status: "error" } : e)))
+        const message = err instanceof Error ? err.message : "Upload failed"
+        setEntries((prev) =>
+          prev.map((e) => (e.id === id ? { ...e, status: "error", message } : e))
+        )
       }
     }
   }
@@ -69,18 +75,26 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
           </div>
         ))}
 
-        {entries.map(({ id, status }) => (
+        {entries.map(({ id, status, message }) => (
           <div
             key={id}
             className="w-24 h-24 border flex items-center justify-center relative text-center px-1"
             style={{ borderColor: status === "error" ? "var(--destructive)" : undefined }}
+            title={message}
           >
             {status === "uploading" ? (
               <span className="text-[10px] text-muted-foreground">Uploading…</span>
             ) : (
               <>
-                <span className="text-[11px] text-destructive font-medium leading-tight">
-                  Upload failed
+                <span className="flex max-h-16 flex-col items-center justify-center overflow-hidden">
+                  <span className="text-[11px] text-destructive font-medium leading-tight">
+                    Upload failed
+                  </span>
+                  {message && (
+                    <span className="mt-1 text-[9px] text-destructive/80 leading-tight break-words">
+                      {message}
+                    </span>
+                  )}
                 </span>
                 <button
                   type="button"

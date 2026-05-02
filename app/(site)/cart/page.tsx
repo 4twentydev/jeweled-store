@@ -51,6 +51,7 @@ export default function CartPage() {
                       fill
                       sizes="(max-width: 768px) 80px, 96px"
                       className="object-cover"
+                      unoptimized
                     />
                   )}
                 </div>
