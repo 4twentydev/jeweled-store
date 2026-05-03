@@ -39,9 +39,9 @@ export function CategoryStrip() {
                   alt=""
                   fill
                   sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 17vw"
-                  className="object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-85"
+                  className="object-cover opacity-85 brightness-[1.1] saturate-[1.15] transition duration-700 group-hover:scale-105 group-hover:opacity-100 group-hover:brightness-[1.6] group-hover:saturate-[1.55]"
                 />
-                <div className="absolute inset-0 bg-black/45" />
+                <div className="absolute inset-0 bg-black/25 transition-colors duration-500 group-hover:bg-black/5" />
                 {/* Base gradient */}
                 <div
                   className="absolute inset-0 mix-blend-screen"
