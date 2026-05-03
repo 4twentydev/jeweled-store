@@ -29,8 +29,9 @@ export function CategoryStrip() {
               <Link
                 key={cat.slug}
                 href={`/products?category=${cat.slug}`}
+                aria-label={`Browse ${cat.label}`}
                 className={cn(
-                  "group relative flex flex-col justify-end p-6 lg:p-8 overflow-hidden min-h-[200px] lg:min-h-[300px]"
+                  "group relative block overflow-hidden min-h-[200px] lg:min-h-[300px]"
                 )}
               >
                 <Image
@@ -51,15 +52,6 @@ export function CategoryStrip() {
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                   style={{ background: cat.hoverGradient }}
                 />
-
-                <div className="relative z-10">
-                  <p className="text-[10px] tracking-[0.18em] uppercase text-muted-foreground group-hover:text-foreground/50 transition-colors mb-1.5">
-                    {cat.description}
-                  </p>
-                  <p className="text-sm tracking-[0.12em] uppercase text-foreground">
-                    {cat.label}
-                  </p>
-                </div>
               </Link>
             ))}
           </div>
