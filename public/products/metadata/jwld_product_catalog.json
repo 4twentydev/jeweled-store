@@ -1,0 +1,660 @@
+[
+  {
+    "sku": "JWLD-001",
+    "name": "Honey Bee Stripe Rhinestone Lighter",
+    "slug": "honey-bee-stripe-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Bee Collection",
+    "color": "Yellow, black, silver",
+    "images": {
+      "png": "images/png/jwld-001-honey-bee-stripe-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-001-honey-bee-stripe-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A yellow rhinestone lighter with bold black bee-stripe bands and a small metallic bee charm.",
+    "description": "This Honey Bee Stripe Rhinestone Lighter brings a bright yellow crystal wrap together with clean black horizontal striping and a small bee accent near the top. It has a playful boutique look while still feeling polished enough for the JWLD product line.",
+    "features": [
+      "Hand-decorated rhinestone finish",
+      "Black stripe bee-inspired pattern",
+      "Metallic bee charm detail",
+      "Compact standard lighter shape",
+      "One-of-one handmade variation"
+    ],
+    "tags": [
+      "bee",
+      "yellow",
+      "black",
+      "rhinestone",
+      "lighter",
+      "giftable"
+    ],
+    "altText": "Honey Bee Stripe Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-002",
+    "name": "Golden Honey Bee Rhinestone Lighter",
+    "slug": "golden-honey-bee-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Bee Collection",
+    "color": "Golden yellow, silver",
+    "images": {
+      "png": "images/png/jwld-002-golden-honey-bee-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-002-golden-honey-bee-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A golden yellow crystal lighter finished with a metallic bee charm for a clean honey-glow look.",
+    "description": "The Golden Honey Bee Rhinestone Lighter keeps the design simple and bright with a full yellow crystal wrap and a small bee charm placed near the top. It is bold, shiny, and easy to pair with the rest of the JWLD bee-inspired pieces.",
+    "features": [
+      "Full yellow rhinestone coverage",
+      "Metallic bee charm accent",
+      "Glossy handmade finish",
+      "Compact everyday size",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "bee",
+      "yellow",
+      "gold",
+      "rhinestone",
+      "lighter"
+    ],
+    "altText": "Golden Honey Bee Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-003",
+    "name": "Citrus Stripe Beaded Lighter",
+    "slug": "citrus-stripe-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Color Pop",
+    "color": "Orange, green, yellow",
+    "images": {
+      "png": "images/png/jwld-003-citrus-stripe-beaded-lighter.png",
+      "webp": "images/webp/jwld-003-citrus-stripe-beaded-lighter.webp"
+    },
+    "shortDescription": "A bright orange, green, and yellow beaded lighter with stacked citrus-toned stripes.",
+    "description": "The Citrus Stripe Beaded Lighter uses alternating bands of orange, green, and yellow beads for a fresh, candy-bright look. It is a fun statement piece for customers who want something colorful without adding text or charms.",
+    "features": [
+      "Stacked striped bead pattern",
+      "Bright citrus-inspired palette",
+      "Smooth rounded bead texture",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "orange",
+      "green",
+      "stripe",
+      "beaded",
+      "lighter",
+      "colorful"
+    ],
+    "altText": "Citrus Stripe Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-004",
+    "name": "Blue AB Bitch Lettered Lighter",
+    "slug": "blue-ab-bitch-lettered-lighter",
+    "category": "Lighter",
+    "collection": "Attitude Collection",
+    "color": "Blue AB, black, white",
+    "images": {
+      "png": "images/png/jwld-004-blue-ab-bitch-lettered-lighter.png",
+      "webp": "images/webp/jwld-004-blue-ab-bitch-lettered-lighter.webp"
+    },
+    "shortDescription": "A blue AB rhinestone lighter with vertical letter beads spelling BITCH down the front.",
+    "description": "The Blue AB Bitch Lettered Lighter pairs electric blue aurora-style stones with bold vertical letter beads for a sharp attitude piece. It is loud, glossy, and made for customers who want their accessory to say something before they do.",
+    "features": [
+      "Blue AB rhinestone coverage",
+      "Vertical letter bead statement",
+      "High-shine crystal finish",
+      "Compact standard lighter shape",
+      "One-of-one handmade variation"
+    ],
+    "tags": [
+      "blue",
+      "AB",
+      "lettered",
+      "attitude",
+      "rhinestone",
+      "lighter"
+    ],
+    "altText": "Blue AB Bitch Lettered Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-005",
+    "name": "Blueberry Pop Rhinestone Lighter",
+    "slug": "blueberry-pop-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Color Pop",
+    "color": "Blue, pink, orange",
+    "images": {
+      "png": "images/png/jwld-005-blueberry-pop-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-005-blueberry-pop-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A blue crystal lighter with pink and orange accent stones for a bright candy-pop finish.",
+    "description": "The Blueberry Pop Rhinestone Lighter mixes cool blue stones with warm pink and orange accents for a playful, high-shine color blend. It has a clean product-card look with enough color variation to stand out in a grid.",
+    "features": [
+      "Mixed blue, pink, and orange rhinestones",
+      "Bright candy-inspired palette",
+      "Hand-applied stonework",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "blue",
+      "pink",
+      "orange",
+      "rhinestone",
+      "lighter",
+      "colorful"
+    ],
+    "altText": "Blueberry Pop Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-006",
+    "name": "Powder Blue Beaded Lighter",
+    "slug": "powder-blue-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Soft Solids",
+    "color": "Powder blue",
+    "images": {
+      "png": "images/png/jwld-006-powder-blue-beaded-lighter.png",
+      "webp": "images/webp/jwld-006-powder-blue-beaded-lighter.webp"
+    },
+    "shortDescription": "A clean powder blue beaded lighter with a soft, simple monochrome finish.",
+    "description": "The Powder Blue Beaded Lighter keeps the look minimal with a full wrap of smooth light-blue beads. It is simple, clean, and easy to style with lighter-colored JWLD accessories.",
+    "features": [
+      "Solid powder blue bead wrap",
+      "Soft monochrome look",
+      "Smooth rounded bead texture",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "blue",
+      "powder-blue",
+      "beaded",
+      "lighter",
+      "minimal"
+    ],
+    "altText": "Powder Blue Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-007",
+    "name": "Pastel Rainbow Smile Rhinestone Lighter",
+    "slug": "pastel-rainbow-smile-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Happy Icons",
+    "color": "Pink, rainbow, silver",
+    "images": {
+      "png": "images/png/jwld-007-pastel-rainbow-smile-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-007-pastel-rainbow-smile-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A pastel pink rhinestone lighter with rainbow tones, small smile accents, and playful sparkle.",
+    "description": "The Pastel Rainbow Smile Rhinestone Lighter blends pink stones with rainbow accents and small decorative smile details. It reads cute, bright, and playful without losing the boutique handmade feel.",
+    "features": [
+      "Pastel rhinestone finish",
+      "Rainbow accent stones",
+      "Small smiley-style details",
+      "Compact standard lighter shape",
+      "One-of-one handmade variation"
+    ],
+    "tags": [
+      "pastel",
+      "rainbow",
+      "pink",
+      "smiley",
+      "rhinestone",
+      "lighter"
+    ],
+    "altText": "Pastel Rainbow Smile Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-008",
+    "name": "Midnight Garden Rhinestone Lighter",
+    "slug": "midnight-garden-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Dark Shine",
+    "color": "Black, multicolor",
+    "images": {
+      "png": "images/png/jwld-008-midnight-garden-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-008-midnight-garden-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A black rhinestone lighter scattered with colorful flower-like crystal accents.",
+    "description": "The Midnight Garden Rhinestone Lighter starts with a dark crystal base and adds small multicolor floral accents across the front. It has a moodier look than the bright pieces while still giving off JWLD-level sparkle.",
+    "features": [
+      "Black rhinestone base",
+      "Multicolor floral accent pattern",
+      "Dark boutique finish",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "black",
+      "floral",
+      "multicolor",
+      "rhinestone",
+      "lighter",
+      "dark"
+    ],
+    "altText": "Midnight Garden Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-009",
+    "name": "Sunshine Daisy Rhinestone Lighter",
+    "slug": "sunshine-daisy-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Flower Collection",
+    "color": "Yellow, green, black",
+    "images": {
+      "png": "images/png/jwld-009-sunshine-daisy-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-009-sunshine-daisy-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A yellow rhinestone lighter with sunflower-style accents for a bright floral statement.",
+    "description": "The Sunshine Daisy Rhinestone Lighter uses a full yellow crystal wrap with stacked floral accents down the front. It is cheerful, loud, and built for customers who want a lighter that feels like a tiny accessory piece.",
+    "features": [
+      "Yellow rhinestone coverage",
+      "Sunflower-style accent details",
+      "Bright floral look",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "yellow",
+      "sunflower",
+      "daisy",
+      "floral",
+      "rhinestone",
+      "lighter"
+    ],
+    "altText": "Sunshine Daisy Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-010",
+    "name": "Santa Suit Beaded Lighter",
+    "slug": "santa-suit-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Holiday Collection",
+    "color": "Red, white, black",
+    "images": {
+      "png": "images/png/jwld-010-santa-suit-beaded-lighter.png",
+      "webp": "images/webp/jwld-010-santa-suit-beaded-lighter.webp"
+    },
+    "shortDescription": "A red beaded lighter with white and black bands inspired by a classic holiday suit look.",
+    "description": "The Santa Suit Beaded Lighter uses a red bead wrap with crisp white and black banding for a festive holiday-inspired design. It is seasonal without being too complicated, making it easy to merchandise in gift sets.",
+    "features": [
+      "Red bead wrap",
+      "White and black holiday-style bands",
+      "Smooth rounded bead texture",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "red",
+      "holiday",
+      "christmas",
+      "beaded",
+      "lighter",
+      "giftable"
+    ],
+    "altText": "Santa Suit Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-011",
+    "name": "Champagne Monogram B Beaded Lighter",
+    "slug": "champagne-monogram-b-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Monogram Collection",
+    "color": "Champagne, ivory",
+    "images": {
+      "png": "images/png/jwld-011-champagne-monogram-b-beaded-lighter.png",
+      "webp": "images/webp/jwld-011-champagne-monogram-b-beaded-lighter.webp"
+    },
+    "shortDescription": "A champagne-and-ivory beaded lighter with a bold monogram-style B on the front.",
+    "description": "The Champagne Monogram B Beaded Lighter combines warm neutral beads with a clean front monogram detail. It gives the product line a more personalized, boutique gift feel without needing a full custom order workflow.",
+    "features": [
+      "Champagne and ivory bead finish",
+      "Monogram-style B detail",
+      "Neutral giftable palette",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "champagne",
+      "monogram",
+      "letter-b",
+      "beaded",
+      "lighter",
+      "neutral"
+    ],
+    "altText": "Champagne Monogram B Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-012",
+    "name": "Candy Cane Stripe Beaded Lighter",
+    "slug": "candy-cane-stripe-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Holiday Collection",
+    "color": "Red, white, green",
+    "images": {
+      "png": "images/png/jwld-012-candy-cane-stripe-beaded-lighter.png",
+      "webp": "images/webp/jwld-012-candy-cane-stripe-beaded-lighter.webp"
+    },
+    "shortDescription": "A red, white, and green striped beaded lighter with a classic candy-cane holiday feel.",
+    "description": "The Candy Cane Stripe Beaded Lighter uses tight horizontal bands of red, white, and green beads for a clean seasonal pattern. It is an easy holiday product that reads clearly in small thumbnails.",
+    "features": [
+      "Red, white, and green stripe pattern",
+      "Holiday-inspired beadwork",
+      "Smooth rounded bead texture",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "candy-cane",
+      "holiday",
+      "stripe",
+      "beaded",
+      "lighter",
+      "green"
+    ],
+    "altText": "Candy Cane Stripe Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-013",
+    "name": "Snowman Beaded Lighter",
+    "slug": "snowman-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Holiday Collection",
+    "color": "White, black, red",
+    "images": {
+      "png": "images/png/jwld-013-snowman-beaded-lighter.png",
+      "webp": "images/webp/jwld-013-snowman-beaded-lighter.webp"
+    },
+    "shortDescription": "A white beaded lighter with a black top band and simple snowman face-and-button details.",
+    "description": "The Snowman Beaded Lighter keeps the holiday theme clean with a white bead body, black top band, red nose accent, and button details down the front. It is cute, recognizable, and easy to sell as a winter gift item.",
+    "features": [
+      "White bead wrap",
+      "Snowman face and button detail",
+      "Black top band accent",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "snowman",
+      "white",
+      "holiday",
+      "winter",
+      "beaded",
+      "lighter"
+    ],
+    "altText": "Snowman Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-014",
+    "name": "Neon Lime Beaded Lighter",
+    "slug": "neon-lime-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Soft Solids",
+    "color": "Neon lime green",
+    "images": {
+      "png": "images/png/jwld-014-neon-lime-beaded-lighter.png",
+      "webp": "images/webp/jwld-014-neon-lime-beaded-lighter.webp"
+    },
+    "shortDescription": "A bright neon lime beaded lighter with a clean solid-color wrap.",
+    "description": "The Neon Lime Beaded Lighter is a simple solid-color piece with a bright green finish that hits hard in a product grid. It works well as a basic colorway for customers who prefer bold color over extra charms.",
+    "features": [
+      "Solid neon lime bead wrap",
+      "Bright monochrome look",
+      "Smooth rounded bead texture",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "green",
+      "lime",
+      "neon",
+      "beaded",
+      "lighter",
+      "solid"
+    ],
+    "altText": "Neon Lime Beaded Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-015",
+    "name": "Pearl Opal Rhinestone Lighter",
+    "slug": "pearl-opal-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Pearl Collection",
+    "color": "Pearl, ivory, opal",
+    "images": {
+      "png": "images/png/jwld-015-pearl-opal-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-015-pearl-opal-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A pearl-toned rhinestone lighter with a soft opal shimmer and clean luxury finish.",
+    "description": "The Pearl Opal Rhinestone Lighter gives the collection a softer luxury piece with ivory, pearl, and opal-style sparkle. It is understated compared with the bright colorways but still catches light from every angle.",
+    "features": [
+      "Pearl and opal rhinestone finish",
+      "Soft neutral colorway",
+      "Glossy handmade shine",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "pearl",
+      "opal",
+      "ivory",
+      "rhinestone",
+      "lighter",
+      "neutral"
+    ],
+    "altText": "Pearl Opal Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-016",
+    "name": "Black Onyx Rhinestone Lighter",
+    "slug": "black-onyx-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Dark Shine",
+    "color": "Black, gunmetal",
+    "images": {
+      "png": "images/png/jwld-016-black-onyx-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-016-black-onyx-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A dark black rhinestone lighter with a clean onyx-style crystal finish.",
+    "description": "The Black Onyx Rhinestone Lighter is the cleanest dark piece in the set, using black stones for a glossy, minimal look. It fits the JWLD luxury-dark aesthetic and works well as a staple colorway.",
+    "features": [
+      "Black rhinestone coverage",
+      "Glossy onyx-style finish",
+      "Minimal dark colorway",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "black",
+      "onyx",
+      "rhinestone",
+      "lighter",
+      "dark",
+      "minimal"
+    ],
+    "altText": "Black Onyx Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-017",
+    "name": "Blue Lagoon Ombre Rhinestone Lighter",
+    "slug": "blue-lagoon-ombre-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Ombre Collection",
+    "color": "Blue, turquoise",
+    "images": {
+      "png": "images/png/jwld-017-blue-lagoon-ombre-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-017-blue-lagoon-ombre-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A blue-to-turquoise rhinestone lighter with a clean ocean-style ombre fade.",
+    "description": "The Blue Lagoon Ombre Rhinestone Lighter fades from deeper blue into bright turquoise for a clean water-toned look. It is simple, vivid, and strong enough to carry a product image without extra charms or text.",
+    "features": [
+      "Blue-to-turquoise ombre stones",
+      "High-shine rhinestone finish",
+      "Clean gradient colorway",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "blue",
+      "turquoise",
+      "ombre",
+      "rhinestone",
+      "lighter",
+      "ocean"
+    ],
+    "altText": "Blue Lagoon Ombre Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-018",
+    "name": "Black Onyx Crystal Mini Container",
+    "slug": "black-onyx-crystal-mini-container",
+    "category": "Container",
+    "collection": "Mini Containers",
+    "color": "Black",
+    "images": {
+      "png": "images/png/jwld-018-black-onyx-crystal-mini-container.png",
+      "webp": "images/webp/jwld-018-black-onyx-crystal-mini-container.webp"
+    },
+    "shortDescription": "A round black crystal mini container with a dark high-shine finish.",
+    "description": "The Black Onyx Crystal Mini Container gives the JWLD lineup a compact accessory piece with dark crystal coverage and a clean round shape. It is useful as a displayable mini container, gift add-on, or matching piece for the black lighter styles.",
+    "features": [
+      "Round mini container shape",
+      "Black crystal-covered exterior",
+      "Glossy dark finish",
+      "Compact accessory size",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "black",
+      "container",
+      "mini-container",
+      "crystal",
+      "onyx",
+      "dark"
+    ],
+    "altText": "Black Onyx Crystal Mini Container product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-019",
+    "name": "Lilac Candy Bead Mini Container",
+    "slug": "lilac-candy-bead-mini-container",
+    "category": "Container",
+    "collection": "Mini Containers",
+    "color": "Lilac purple, black",
+    "images": {
+      "png": "images/png/jwld-019-lilac-candy-bead-mini-container.png",
+      "webp": "images/webp/jwld-019-lilac-candy-bead-mini-container.webp"
+    },
+    "shortDescription": "A round lilac beaded mini container with a soft candy-like finish and black base.",
+    "description": "The Lilac Candy Bead Mini Container is a soft purple accessory piece with rounded bead coverage and a clean black base. It feels playful, giftable, and visually consistent with the lighter product shots.",
+    "features": [
+      "Round mini container shape",
+      "Lilac bead-covered exterior",
+      "Soft candy-inspired colorway",
+      "Compact accessory size",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "lilac",
+      "purple",
+      "container",
+      "mini-container",
+      "beaded",
+      "giftable"
+    ],
+    "altText": "Lilac Candy Bead Mini Container product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-020",
+    "name": "Sunflower Pearl Rhinestone Lighter",
+    "slug": "sunflower-pearl-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Flower Collection",
+    "color": "White, yellow, pearl",
+    "images": {
+      "png": "images/png/jwld-020-sunflower-pearl-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-020-sunflower-pearl-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A pearl-white rhinestone lighter with stacked yellow sunflower accents down the front.",
+    "description": "The Sunflower Pearl Rhinestone Lighter combines a soft pearl-white base with bold yellow sunflower accents. It is bright but still clean, making it one of the more gift-friendly floral designs in the group.",
+    "features": [
+      "Pearl-white rhinestone body",
+      "Yellow sunflower accent details",
+      "Bright floral statement look",
+      "Compact standard lighter shape",
+      "Slight handmade variation"
+    ],
+    "tags": [
+      "sunflower",
+      "white",
+      "yellow",
+      "floral",
+      "rhinestone",
+      "lighter"
+    ],
+    "altText": "Sunflower Pearl Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-021",
+    "name": "Ruby Red Rhinestone Lighter",
+    "slug": "ruby-red-rhinestone-lighter",
+    "category": "Lighter",
+    "collection": "Jewel Solids",
+    "color": "Red",
+    "images": {
+      "png": "images/png/jwld-021-ruby-red-rhinestone-lighter.png",
+      "webp": "images/webp/jwld-021-ruby-red-rhinestone-lighter.webp"
+    },
+    "shortDescription": "A full ruby red rhinestone lighter with a bold, clean crystal finish.",
+    "description": "The Ruby Red Rhinestone Lighter is a straightforward solid-color piece with full red crystal coverage. It is loud, glossy, and easy to style as a core JWLD colorway.",
+    "features": [
+      "Full red rhinestone coverage",
+      "Bold ruby-inspired colorway",
+      "High-shine handmade finish",
+      "Compact standard lighter shape",
+      "Handmade one-off styling"
+    ],
+    "tags": [
+      "red",
+      "ruby",
+      "rhinestone",
+      "lighter",
+      "solid",
+      "bold"
+    ],
+    "altText": "Ruby Red Rhinestone Lighter product photo on a warm neutral studio background."
+  },
+  {
+    "sku": "JWLD-022",
+    "name": "Lilac Fuck You Beaded Lighter",
+    "slug": "lilac-fuck-you-beaded-lighter",
+    "category": "Lighter",
+    "collection": "Attitude Collection",
+    "color": "Lilac purple, black, white",
+    "images": {
+      "png": "images/png/jwld-022-lilac-fuck-you-beaded-lighter.png",
+      "webp": "images/webp/jwld-022-lilac-fuck-you-beaded-lighter.webp"
+    },
+    "shortDescription": "A lilac beaded lighter with bold letter beads spelling FUCK YOU on the front.",
+    "description": "The Lilac Fuck You Beaded Lighter pairs a soft purple bead wrap with an unapologetic letter-bead statement on the front. The contrast is the whole point: cute color, sharp attitude, and a handmade finish that stands out immediately.",
+    "features": [
+      "Lilac bead wrap",
+      "Bold letter-bead statement",
+      "Soft color with explicit attitude",
+      "Compact standard lighter shape",
+      "One-of-one handmade variation"
+    ],
+    "tags": [
+      "lilac",
+      "purple",
+      "lettered",
+      "attitude",
+      "beaded",
+      "lighter"
+    ],
+    "altText": "Lilac Fuck You Beaded Lighter product photo on a warm neutral studio background."
+  }
+]
