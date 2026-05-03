@@ -7,9 +7,9 @@ import { SuccessClient } from "@/components/site/success-client"
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>
+  searchParams: Promise<{ lookup_token?: string; session_id?: string }>
 }) {
-  const { session_id } = await searchParams
+  const { lookup_token, session_id } = await searchParams
 
   if (!session_id) {
     return (
@@ -25,7 +25,7 @@ export default async function SuccessPage({
     )
   }
 
-  const initialOrder = await lookupOrderBySession(session_id)
+  const initialOrder = await lookupOrderBySession(session_id, lookup_token)
 
   return (
     <Suspense
@@ -35,7 +35,11 @@ export default async function SuccessPage({
         </div>
       }
     >
-      <SuccessClient sessionId={session_id} initialOrder={initialOrder} />
+      <SuccessClient
+        lookupToken={lookup_token}
+        sessionId={session_id}
+        initialOrder={initialOrder}
+      />
     </Suspense>
   )
 }

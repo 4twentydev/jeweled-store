@@ -104,6 +104,16 @@ export const adminLoginAttempts = pgTable(
   (t) => [index("admin_login_attempts_ip_at_idx").on(t.ip, t.attemptedAt)]
 )
 
+export const customRequestAttempts = pgTable(
+  "custom_request_attempts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ip: text("ip").notNull(),
+    attemptedAt: timestamp("attempted_at").defaultNow().notNull(),
+  },
+  (t) => [index("custom_request_attempts_ip_at_idx").on(t.ip, t.attemptedAt)]
+)
+
 export const ordersRelations = relations(orders, ({ many }) => ({
   orderItems: many(orderItems),
 }))

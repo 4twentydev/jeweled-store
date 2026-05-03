@@ -29,7 +29,6 @@ export function ProductGallery({
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
             priority
-            unoptimized
           />
         )}
       </div>
@@ -51,7 +50,6 @@ export function ProductGallery({
                 fill
                 sizes="96px"
                 className="object-cover"
-                unoptimized
               />
             </button>
           ))}

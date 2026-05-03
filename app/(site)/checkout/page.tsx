@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useCart } from "@/lib/cart-context"
 import Link from "next/link"
 import { ShoppingBag } from "lucide-react"
+import { SHIPPING_CENTS } from "@/lib/checkout"
 
 function formatPrice(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -132,7 +133,18 @@ export default function CheckoutPage() {
               </span>
               <span className="font-mono text-sm">{formatPrice(subtotalCents)}</span>
             </div>
-            <p className="text-[10px] text-muted-foreground/60">Shipping at payment</p>
+            <div className="flex justify-between items-center text-[10px] text-muted-foreground/60">
+              <span>Shipping</span>
+              <span className="font-mono">{formatPrice(SHIPPING_CENTS)}</span>
+            </div>
+            <div className="border-t border-border/30 pt-3 flex justify-between items-center">
+              <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+                Estimated Total
+              </span>
+              <span className="font-mono text-sm">
+                {formatPrice(subtotalCents + SHIPPING_CENTS)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

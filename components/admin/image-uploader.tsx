@@ -1,7 +1,7 @@
 "use client"
 
 import { useController, type Control } from "react-hook-form"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import type { ProductFormInput } from "@/lib/validators"
 
@@ -17,7 +17,10 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
   // Keep a ref so async callbacks always read the latest field value, not the
   // render-cycle snapshot captured when handleFiles was created.
   const fieldRef = useRef(field)
-  fieldRef.current = field
+
+  useEffect(() => {
+    fieldRef.current = field
+  }, [field])
 
   const images = (field.value as string[]) ?? []
 
@@ -63,7 +66,7 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
       <div className="flex flex-wrap gap-2">
         {images.map((url) => (
           <div key={url} className="relative w-24 h-24 border border-border group overflow-hidden">
-            <Image src={url} alt="" fill className="object-cover" unoptimized />
+            <Image src={url} alt="" fill className="object-cover" />
             <button
               type="button"
               onClick={() => field.onChange(images.filter((u) => u !== url))}

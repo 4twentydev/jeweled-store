@@ -15,6 +15,22 @@ function isUniqueConstraintViolation(err: unknown): boolean {
 
 class StockDecrementFailedError extends Error {}
 
+async function refundUnfulfillableSession(session: Stripe.Checkout.Session) {
+  if (session.payment_status && session.payment_status !== "paid") return
+  if (typeof session.payment_intent !== "string") {
+    throw new Error("Cannot refund unfulfillable checkout session without a payment intent")
+  }
+
+  await getStripe().refunds.create(
+    {
+      payment_intent: session.payment_intent,
+      reason: "requested_by_customer",
+      metadata: { checkoutSessionId: session.id },
+    },
+    { idempotencyKey: `unfulfillable_${session.id}` }
+  )
+}
+
 const metadataItemsSchema = z
   .array(
     z.object({
@@ -45,6 +61,10 @@ export async function POST(request: Request) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session
+  if (session.payment_status && session.payment_status !== "paid") {
+    return NextResponse.json({ received: true })
+  }
+
   let cartItems: z.infer<typeof metadataItemsSchema>
   try {
     const parsedItems = metadataItemsSchema.parse(JSON.parse(session.metadata?.items ?? "[]"))
@@ -68,13 +88,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid session metadata" }, { status: 400 })
   }
 
-  const metadataTotalCents = cartItems.reduce(
+  const itemsSubtotalCents = cartItems.reduce(
     (sum, item) => sum + item.priceCents * item.quantity,
     0
   )
-  if (typeof session.amount_total === "number" && session.amount_total !== metadataTotalCents) {
-    return NextResponse.json({ error: "Session total mismatch" }, { status: 400 })
+  if (
+    typeof session.amount_subtotal === "number" &&
+    session.amount_subtotal !== itemsSubtotalCents
+  ) {
+    return NextResponse.json({ error: "Session subtotal mismatch" }, { status: 400 })
   }
+  const totalCents = typeof session.amount_total === "number" ? session.amount_total : itemsSubtotalCents
 
   const customerDetails = session.customer_details
   const shipping =
@@ -156,7 +180,7 @@ export async function POST(request: Request) {
           customerEmail: session.customer_email ?? undefined,
           customerName: customerDetails?.name ?? undefined,
           status: "new",
-          totalCents: metadataTotalCents,
+          totalCents,
           shipping,
         })
 
@@ -172,6 +196,7 @@ export async function POST(request: Request) {
         }
       })
     } else {
+      await refundUnfulfillableSession(session)
       await db.transaction(async (tx) => {
         await tx.insert(orders).values({
           id: orderId,
@@ -181,7 +206,7 @@ export async function POST(request: Request) {
           customerEmail: session.customer_email ?? undefined,
           customerName: customerDetails?.name ?? undefined,
           status: orderStatus,
-          totalCents: metadataTotalCents,
+          totalCents,
           shipping,
         })
 
@@ -193,6 +218,7 @@ export async function POST(request: Request) {
   } catch (err) {
     if (err instanceof StockDecrementFailedError) {
       try {
+        await refundUnfulfillableSession(session)
         await db.transaction(async (tx) => {
           await tx.insert(orders).values({
             id: orderId,
@@ -202,7 +228,7 @@ export async function POST(request: Request) {
             customerEmail: session.customer_email ?? undefined,
             customerName: customerDetails?.name ?? undefined,
             status: "cancelled",
-            totalCents: metadataTotalCents,
+            totalCents,
             shipping,
           })
 

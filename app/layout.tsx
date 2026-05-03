@@ -39,14 +39,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      {/* Accent colour set before paint — no flash */}
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var a=["#C8A2C8","#D4AF37","#FF5CA8","#7DF9FF","#B6FF7D"];document.documentElement.style.setProperty("--jwld-accent",a[Math.floor(Math.random()*a.length)])})()`,
-          }}
-        />
-      </head>
       <body className="min-h-full flex flex-col">
         <CartProvider>{children}</CartProvider>
       </body>

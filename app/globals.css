@@ -72,7 +72,7 @@
   --ring: rgb(255 255 255 / 0.12);
   --radius: 0rem;
 
-  /* Luxury accent — set per page load by inline script in layout */
+  /* Luxury accent */
   --jwld-accent: #d4af37;
 
   --sidebar: #0e0e0e;

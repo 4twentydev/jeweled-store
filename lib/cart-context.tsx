@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react"
 import type { CartItem } from "@/types"
+import { MAX_CART_STORAGE_ITEMS, MAX_CHECKOUT_QUANTITY } from "@/lib/validators"
 
 type CartState = {
   items: CartItem[]
@@ -23,16 +24,67 @@ type CartAction =
   | { type: "CLOSE" }
   | { type: "HYDRATE"; items: CartItem[] }
 
+function sanitizeCartItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .slice(0, MAX_CART_STORAGE_ITEMS)
+    .flatMap((item): CartItem[] => {
+      if (typeof item !== "object" || item === null) return []
+      const candidate = item as Partial<CartItem>
+      if (
+        typeof candidate.productId !== "string" ||
+        typeof candidate.slug !== "string" ||
+        typeof candidate.name !== "string" ||
+        typeof candidate.priceCents !== "number" ||
+        typeof candidate.quantity !== "number" ||
+        typeof candidate.maxStock !== "number" ||
+        (typeof candidate.image !== "string" && candidate.image !== null)
+      ) {
+        return []
+      }
+
+      const maxStock = Math.max(0, Math.floor(candidate.maxStock))
+      const quantity = Math.min(
+        Math.max(1, Math.floor(candidate.quantity)),
+        maxStock,
+        MAX_CHECKOUT_QUANTITY
+      )
+
+      if (
+        maxStock <= 0 ||
+        quantity <= 0 ||
+        !Number.isFinite(candidate.priceCents) ||
+        candidate.priceCents <= 0
+      ) {
+        return []
+      }
+
+      return [
+        {
+          productId: candidate.productId,
+          slug: candidate.slug,
+          name: candidate.name,
+          priceCents: Math.floor(candidate.priceCents),
+          image: candidate.image,
+          quantity,
+          maxStock,
+        },
+      ]
+    })
+}
+
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "HYDRATE":
-      return { ...state, items: action.items }
+      return { ...state, items: sanitizeCartItems(action.items) }
     case "ADD": {
       const existing = state.items.find((i) => i.productId === action.payload.productId)
       if (existing) {
         const newQty = Math.min(
           existing.quantity + action.payload.quantity,
-          action.payload.maxStock
+          action.payload.maxStock,
+          MAX_CHECKOUT_QUANTITY
         )
         return {
           ...state,
@@ -43,7 +95,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ),
         }
       }
-      return { ...state, items: [...state.items, action.payload] }
+      return { ...state, items: sanitizeCartItems([...state.items, action.payload]) }
     }
     case "REMOVE":
       return { ...state, items: state.items.filter((i) => i.productId !== action.productId) }
@@ -54,7 +106,9 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: state.items.map((i) =>
-          i.productId === action.productId ? { ...i, quantity: action.quantity } : i
+          i.productId === action.productId
+            ? { ...i, quantity: Math.min(action.quantity, i.maxStock, MAX_CHECKOUT_QUANTITY) }
+            : i
         ),
       }
     }
@@ -91,9 +145,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
-        const parsed = JSON.parse(stored) as CartItem[]
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          dispatch({ type: "HYDRATE", items: parsed })
+        const parsed = JSON.parse(stored) as unknown
+        const items = sanitizeCartItems(parsed)
+        if (items.length > 0) {
+          dispatch({ type: "HYDRATE", items })
         }
       }
     } catch {

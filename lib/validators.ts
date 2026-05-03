@@ -1,5 +1,9 @@
 import { z } from "zod"
 
+export const MAX_CHECKOUT_LINE_ITEMS = 25
+export const MAX_CHECKOUT_QUANTITY = 10
+export const MAX_CART_STORAGE_ITEMS = 50
+
 export const PRODUCT_CATEGORIES = [
   { value: "bejeweled-lighters", label: "Bejeweled Lighters" },
   { value: "lighter-cases", label: "Lighter Cases" },
@@ -8,6 +12,17 @@ export const PRODUCT_CATEGORIES = [
   { value: "lotions", label: "Lotions" },
   { value: "custom-rhinestone-items", label: "Custom Rhinestone Items" },
 ] as const
+
+const productImageUrlSchema = z.url().refine(
+  (value) => {
+    const url = new URL(value)
+    return (
+      url.protocol === "https:" &&
+      url.hostname.endsWith(".public.blob.vercel-storage.com")
+    )
+  },
+  "Images must be uploaded through the admin image uploader"
+)
 
 export const productFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,7 +36,7 @@ export const productFormSchema = z.object({
   stock: z.int().min(0, "Stock cannot be negative"),
   featured: z.boolean(),
   active: z.boolean(),
-  images: z.array(z.string().url()),
+  images: z.array(productImageUrlSchema),
 })
 
 export type ProductFormInput = z.infer<typeof productFormSchema>
@@ -32,10 +47,11 @@ export const checkoutSchema = z.object({
     .array(
       z.object({
         productId: z.string().uuid(),
-        quantity: z.int().min(1),
+        quantity: z.int().min(1).max(MAX_CHECKOUT_QUANTITY),
       })
     )
-    .min(1),
+    .min(1)
+    .max(MAX_CHECKOUT_LINE_ITEMS),
 })
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>

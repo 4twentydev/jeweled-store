@@ -15,6 +15,13 @@
       "when": 1777692186437,
       "tag": "0001_burly_dark_phoenix",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777798560000,
+      "tag": "0002_custom_request_attempts",
+      "breakpoints": true
     }
   ]
 }

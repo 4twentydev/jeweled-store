@@ -15,9 +15,11 @@ function formatPrice(cents: number) {
 }
 
 export function SuccessClient({
+  lookupToken,
   sessionId,
   initialOrder,
 }: {
+  lookupToken?: string
   sessionId: string
   initialOrder: SuccessOrder | null
 }) {
@@ -32,7 +34,7 @@ export function SuccessClient({
   }, [clearCart])
 
   useEffect(() => {
-    if (order || !sessionId) return
+    if (order || !sessionId || !lookupToken) return
 
     startTimeRef.current = Date.now()
     const MAX_WAIT_MS = 30_000
@@ -45,7 +47,7 @@ export function SuccessClient({
         return
       }
       try {
-        const result = await lookupOrderBySession(sessionId)
+        const result = await lookupOrderBySession(sessionId, lookupToken)
         if (result) {
           setOrder(result)
           if (intervalRef.current) clearInterval(intervalRef.current)
@@ -60,7 +62,7 @@ export function SuccessClient({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [sessionId, order])
+  }, [lookupToken, sessionId, order])
 
   if (order) {
     const needsAttention = order.status === "cancelled"

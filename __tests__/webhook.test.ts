@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => {
     decrementReturning,
     transaction,
     constructEvent: vi.fn(),
+    refundCreate: vi.fn(),
   }
 })
 
@@ -41,6 +42,7 @@ vi.mock("@/db", () => ({
 vi.mock("@/lib/stripe", () => ({
   getStripe: () => ({
     webhooks: { constructEvent: mocks.constructEvent },
+    refunds: { create: mocks.refundCreate },
   }),
 }))
 
@@ -71,6 +73,7 @@ function makeSession(overrides: Record<string, unknown> = {}) {
       },
     },
     amount_total: ORDER_ITEM.priceCents * ORDER_ITEM.quantity,
+    amount_subtotal: ORDER_ITEM.priceCents * ORDER_ITEM.quantity,
     metadata: { items: JSON.stringify([ORDER_ITEM]) },
     ...overrides,
   }
@@ -111,6 +114,7 @@ describe("POST /api/stripe/webhook", () => {
     mocks.transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) =>
       callback({ insert: mocks.insert, update: mocks.update })
     )
+    mocks.refundCreate.mockResolvedValue({ id: "re_test" })
   })
 
   it("returns 400 when stripe-signature header is missing", async () => {
@@ -165,8 +169,8 @@ describe("POST /api/stripe/webhook", () => {
       expect(res.status).toBe(400)
     })
 
-    it("returns 400 when amount_total mismatches computed metadata total", async () => {
-      mocks.constructEvent.mockReturnValue(makeEvent(makeSession({ amount_total: 9999 })))
+    it("returns 400 when amount_subtotal mismatches computed metadata subtotal", async () => {
+      mocks.constructEvent.mockReturnValue(makeEvent(makeSession({ amount_subtotal: 9999 })))
       const res = await POST(makeRequest())
       expect(res.status).toBe(400)
       expect((await res.json()).error).toMatch(/mismatch/)
@@ -181,6 +185,7 @@ describe("POST /api/stripe/webhook", () => {
       expect(res.status).toBe(200)
       expect(mocks.transaction).toHaveBeenCalledOnce()
       expect(mocks.update).not.toHaveBeenCalled()
+      expect(mocks.refundCreate).toHaveBeenCalledOnce()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
       )
@@ -193,6 +198,7 @@ describe("POST /api/stripe/webhook", () => {
       expect(res.status).toBe(200)
       expect(mocks.transaction).toHaveBeenCalledOnce()
       expect(mocks.update).not.toHaveBeenCalled()
+      expect(mocks.refundCreate).toHaveBeenCalledOnce()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
       )
@@ -207,6 +213,7 @@ describe("POST /api/stripe/webhook", () => {
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
       expect(mocks.transaction).toHaveBeenCalledTimes(2)
+      expect(mocks.refundCreate).toHaveBeenCalledOnce()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
       )
