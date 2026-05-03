@@ -7,8 +7,61 @@ import type { ProductFormInput } from "@/lib/validators"
 
 const LABEL = "text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
 const ERROR = "text-[11px] text-destructive mt-1"
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+const MAX_COMPRESSED_DIMENSION = 2400
+const WEBP_QUALITIES = [0.86, 0.78, 0.7, 0.62]
 
 type UploadEntry = { id: string; status: "uploading" | "error"; message?: string }
+
+function formatFileSize(bytes: number) {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, "image/webp", quality)
+  })
+}
+
+async function prepareUploadFile(file: File) {
+  if (file.size <= MAX_UPLOAD_BYTES) return file
+
+  let bitmap: ImageBitmap
+  try {
+    bitmap = await createImageBitmap(file)
+  } catch {
+    throw new Error(`Image is ${formatFileSize(file.size)}. Upload a file under 10 MB.`)
+  }
+
+  try {
+    const scale = Math.min(
+      1,
+      MAX_COMPRESSED_DIMENSION / Math.max(bitmap.width, bitmap.height)
+    )
+    const canvas = document.createElement("canvas")
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale))
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale))
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) throw new Error("Could not prepare image for upload")
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+
+    for (const quality of WEBP_QUALITIES) {
+      const blob = await canvasToBlob(canvas, quality)
+      if (blob && blob.size <= MAX_UPLOAD_BYTES) {
+        const basename = file.name.replace(/\.[^.]+$/, "") || "product-image"
+        return new File([blob], `${basename}.webp`, {
+          type: "image/webp",
+          lastModified: Date.now(),
+        })
+      }
+    }
+  } finally {
+    bitmap.close()
+  }
+
+  throw new Error(`Image is ${formatFileSize(file.size)}. Upload a file under 10 MB.`)
+}
 
 export function ImageUploader({ control }: { control: Control<ProductFormInput> }) {
   const { field, fieldState } = useController({ name: "images", control })
@@ -33,10 +86,11 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
       const id = crypto.randomUUID()
       setEntries((prev) => [...prev, { id, status: "uploading" }])
 
-      const form = new FormData()
-      form.append("file", file)
-
       try {
+        const uploadFile = await prepareUploadFile(file)
+        const form = new FormData()
+        form.append("file", uploadFile)
+
         const res = await fetch("/api/admin/upload", { method: "POST", body: form })
         const body = await res.json().catch(() => ({}))
         if (!res.ok) {
