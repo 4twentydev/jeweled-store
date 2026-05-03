@@ -5,6 +5,7 @@ import { useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState, useTransition } from "react"
 import Link from "next/link"
+import { ImagePlus, Sparkles, X } from "lucide-react"
 import { productFormSchema, type ProductFormInput, PRODUCT_CATEGORIES } from "@/lib/validators"
 import { createProduct, updateProduct } from "@/server/actions/admin"
 import { cn } from "@/lib/utils"
@@ -28,10 +29,19 @@ const INPUT =
 const LABEL = "text-[10px] tracking-[0.2em] uppercase text-muted-foreground"
 const ERROR = "text-[11px] text-destructive mt-1"
 
+type AiDraftResponse = {
+  product?: ProductFormInput
+  error?: string
+}
+
 export function ProductForm({ product }: { product?: ProductData }) {
   const isEditing = !!product
   const [error, setError] = useState<string | null>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiFiles, setAiFiles] = useState<File[]>([])
+  const [aiMode, setAiMode] = useState<"draft" | "create" | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [isAiPending, startAiTransition] = useTransition()
 
   const {
     register,
@@ -80,6 +90,61 @@ export function ProductForm({ product }: { product?: ProductData }) {
     }
   }
 
+  const applyAiDraft = (draft: ProductFormInput) => {
+    setValue("name", draft.name, { shouldDirty: true, shouldValidate: true })
+    setValue("slug", draft.slug, { shouldDirty: true, shouldValidate: true })
+    setValue("description", draft.description, { shouldDirty: true, shouldValidate: true })
+    setValue("category", draft.category, { shouldDirty: true, shouldValidate: true })
+    setValue("priceInDollars", draft.priceInDollars, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+    setValue("stock", draft.stock, { shouldDirty: true, shouldValidate: true })
+    setValue("featured", draft.featured, { shouldDirty: true, shouldValidate: true })
+    setValue("active", draft.active, { shouldDirty: true, shouldValidate: true })
+    setValue("images", draft.images, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const handleAiFiles = (files: FileList | null) => {
+    setAiError(null)
+    setAiFiles(Array.from(files ?? []).slice(0, 4))
+  }
+
+  const generateFromPhotos = (mode: "draft" | "create") => {
+    if (!aiFiles.length) {
+      setAiError("Upload at least one product photo")
+      return
+    }
+
+    setAiError(null)
+    setError(null)
+    setAiMode(mode)
+    startAiTransition(async () => {
+      const form = new FormData()
+      for (const file of aiFiles) form.append("files", file)
+
+      try {
+        const res = await fetch("/api/admin/ai-product", {
+          method: "POST",
+          body: form,
+        })
+        const body = (await res.json().catch(() => ({}))) as AiDraftResponse
+        if (!res.ok || !body.product) {
+          throw new Error(body.error ?? "AI product generation failed")
+        }
+        applyAiDraft(body.product)
+        if (mode === "create") {
+          const result = await createProduct(body.product)
+          if (result?.error) setError(result.error)
+        }
+      } catch (err) {
+        setAiError(err instanceof Error ? err.message : "AI product generation failed")
+      } finally {
+        setAiMode(null)
+      }
+    })
+  }
+
   const onSubmit = handleSubmit((data) => {
     setError(null)
     startTransition(async () => {
@@ -94,6 +159,77 @@ export function ProductForm({ product }: { product?: ProductData }) {
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
       {error && (
         <p className="text-sm text-destructive border border-destructive/30 px-4 py-3">{error}</p>
+      )}
+
+      {!isEditing && (
+        <div className="border border-border/70 p-4 flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[var(--jwld-accent)]" aria-hidden="true" />
+              <p className={LABEL}>AI Product Generator</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Upload messy reference photos to create a matching catalog image and draft fields.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+              <ImagePlus className="h-4 w-4" aria-hidden="true" />
+              Photos
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(event) => handleAiFiles(event.target.files)}
+              />
+            </label>
+
+            <button
+              type="button"
+              disabled={isAiPending || !aiFiles.length}
+              onClick={() => generateFromPhotos("draft")}
+              className="inline-flex cursor-pointer items-center gap-2 bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              {isAiPending && aiMode === "draft" ? "Generating..." : "Generate Draft"}
+            </button>
+
+            <button
+              type="button"
+              disabled={isAiPending || !aiFiles.length}
+              onClick={() => generateFromPhotos("create")}
+              className="inline-flex cursor-pointer items-center gap-2 border border-border px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              {isAiPending && aiMode === "create" ? "Creating..." : "Generate + Create"}
+            </button>
+          </div>
+
+          {aiFiles.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {aiFiles.map((file) => (
+                <span
+                  key={`${file.name}-${file.lastModified}`}
+                  className="inline-flex max-w-full items-center gap-2 border border-border/60 px-2 py-1 text-[11px] text-muted-foreground"
+                >
+                  <span className="truncate">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAiFiles((files) => files.filter((item) => item !== file))}
+                    className="cursor-pointer text-muted-foreground hover:text-foreground"
+                    aria-label={`Remove ${file.name}`}
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {aiError && <p className={ERROR}>{aiError}</p>}
+        </div>
       )}
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-5">
