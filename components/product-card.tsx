@@ -55,7 +55,7 @@ export function ProductCard({ product }: Props) {
   return (
     <Link href={`/product/${product.slug}`} className="group block">
       <div
-        className="relative aspect-square overflow-hidden mb-4"
+        className="product-image-frame relative aspect-square mb-4"
         style={{ background: bg }}
       >
         {firstImage && (
@@ -69,7 +69,7 @@ export function ProductCard({ product }: Props) {
         )}
         {badge && (
           <span
-            className="absolute top-3 left-3 text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 border z-10"
+            className="absolute top-3 right-3 text-[10px] tracking-[0.2em] uppercase px-2 py-0.5 border z-10"
             style={{
               color: "var(--jwld-accent)",
               borderColor: "var(--jwld-accent)",

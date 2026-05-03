@@ -20,7 +20,7 @@ export function ProductGallery({
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-square w-full overflow-hidden" style={{ background }}>
+      <div className="product-image-frame relative aspect-square w-full" style={{ background }}>
         {activeImage && (
           <Image
             src={activeImage}
@@ -40,7 +40,7 @@ export function ProductGallery({
               key={image}
               type="button"
               onClick={() => setActive(index)}
-              className="relative aspect-square overflow-hidden border border-border/40 data-[active=true]:border-foreground"
+              className="product-image-frame relative aspect-square border-border/40 data-[active=true]:border-foreground"
               data-active={active === index}
               aria-label={`View ${name} image ${index + 1}`}
             >

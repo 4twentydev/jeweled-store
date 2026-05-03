@@ -44,7 +44,7 @@ export default function CartPage() {
           <ul className="divide-y divide-border/30">
             {items.map((item) => (
               <li key={item.productId} className="py-8 flex gap-6">
-                <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 overflow-hidden bg-[#1a1a1a]">
+                <div className="product-image-frame relative w-20 h-20 md:w-24 md:h-24 shrink-0 bg-[#1a1a1a]">
                   {item.image && (
                     <Image
                       src={item.image}

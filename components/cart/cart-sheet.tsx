@@ -98,7 +98,7 @@ export function CartSheet() {
                 <ul className="divide-y divide-border/30">
                   {items.map((item) => (
                     <li key={item.productId} className="px-6 py-5 flex gap-4">
-                      <div className="relative w-16 h-16 shrink-0 overflow-hidden bg-[#1a1a1a]">
+                      <div className="product-image-frame relative w-16 h-16 shrink-0 bg-[#1a1a1a]">
                         {item.image && (
                           <Image
                             src={item.image}
