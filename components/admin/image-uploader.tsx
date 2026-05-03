@@ -25,10 +25,11 @@ export function ImageUploader({ control }: { control: Control<ProductFormInput> 
   const images = (field.value as string[]) ?? []
 
   async function handleFiles(files: FileList | null) {
-    if (!files?.length) return
+    const selectedFiles = Array.from(files ?? [])
+    if (!selectedFiles.length) return
     if (inputRef.current) inputRef.current.value = ""
 
-    for (const file of Array.from(files)) {
+    for (const file of selectedFiles) {
       const id = crypto.randomUUID()
       setEntries((prev) => [...prev, { id, status: "uploading" }])
 
