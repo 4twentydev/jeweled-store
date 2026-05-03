@@ -1,0 +1,572 @@
+[
+  {
+    "id": "jwld-santa-suit-crystal-lighter",
+    "slug": "santa-suit-crystal-lighter",
+    "sku": "JWLD-LTR-HOL-001",
+    "name": "Santa Suit Crystal Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2600,
+    "source": "sparkling_santa_themed_cigarette_lighter.png",
+    "image": "jwld-santa-suit-crystal-lighter-01.webp",
+    "shortDescription": "A red rhinestone lighter with white trim, a black belt detail, and a tiny gold buckle for a full Santa-suit sparkle look.",
+    "description": "The Santa Suit Crystal Lighter turns a basic everyday lighter into a holiday statement piece. Bright red crystals cover the body, while white rhinestone bands create the classic trim effect. A black belt row and small gold buckle detail finish the design with just enough festive attitude.",
+    "features": [
+      "Red crystal-covered body",
+      "White trim-inspired rhinestone rows",
+      "Black belt detail with gold buckle accent",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated statement accessory"
+    ],
+    "details": {
+      "mainColor": "Red",
+      "accentColors": [
+        "White",
+        "Black",
+        "Gold"
+      ],
+      "finish": "Faceted rhinestone crystal",
+      "style": "Holiday / Santa / festive"
+    },
+    "tags": [
+      "holiday",
+      "christmas",
+      "santa",
+      "red",
+      "rhinestone",
+      "lighter",
+      "gift"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-santa-suit-crystal-lighter-01.webp",
+        "alt": "Santa Suit Crystal Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-santa-suit-crystal-lighter-thumb.webp",
+    "imageAlt": "Santa Suit Crystal Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Santa Suit Crystal Lighter | JWLD",
+    "seoDescription": "A red rhinestone lighter with white trim, a black belt detail, and a tiny gold buckle for a full Santa-suit sparkle look.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Holiday Sparkle"
+  },
+  {
+    "id": "jwld-gingerbread-gold-beaded-lighter",
+    "slug": "gingerbread-gold-beaded-lighter",
+    "sku": "JWLD-LTR-HOL-002",
+    "name": "Gingerbread Gold Beaded Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2400,
+    "source": "beaded_lighter_with_metallic_accents.png",
+    "image": "jwld-gingerbread-gold-beaded-lighter-01.webp",
+    "shortDescription": "A warm gold beaded lighter with white stripe accents and a darker center motif for a cozy gingerbread-inspired finish.",
+    "description": "The Gingerbread Gold Beaded Lighter has a warm holiday-cookie vibe without going too literal. Gold-tone beads wrap the body with clean white accent bands, while the darker center detail gives it a handmade, festive focal point. It is soft, neutral, and giftable while still catching light from every angle.",
+    "features": [
+      "Gold-tone beaded body",
+      "Glossy white horizontal accent bands",
+      "Darker center bead motif",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated textured finish"
+    ],
+    "details": {
+      "mainColor": "Gold",
+      "accentColors": [
+        "White",
+        "Amber",
+        "Brown"
+      ],
+      "finish": "Glossy beadwork",
+      "style": "Holiday / gingerbread / neutral glam"
+    },
+    "tags": [
+      "holiday",
+      "gingerbread",
+      "gold",
+      "white",
+      "beaded",
+      "lighter",
+      "neutral"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-gingerbread-gold-beaded-lighter-01.webp",
+        "alt": "Gingerbread Gold Beaded Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-gingerbread-gold-beaded-lighter-thumb.webp",
+    "imageAlt": "Gingerbread Gold Beaded Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Gingerbread Gold Beaded Lighter | JWLD",
+    "seoDescription": "A warm gold beaded lighter with white stripe accents and a darker center motif for a cozy gingerbread-inspired finish.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Holiday Sparkle"
+  },
+  {
+    "id": "jwld-candy-cane-stripe-lighter",
+    "slug": "candy-cane-stripe-lighter",
+    "sku": "JWLD-LTR-HOL-003",
+    "name": "Candy Cane Stripe Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2400,
+    "source": "rhinestone_studded_disposable_lighter_close_up.png",
+    "image": "jwld-candy-cane-stripe-lighter-01.webp",
+    "shortDescription": "A red, white, and green striped rhinestone lighter with a bright holiday candy-cane look.",
+    "description": "The Candy Cane Stripe Lighter brings classic holiday color in a clean, repeating stripe pattern. Rows of red, white, and green crystals wrap the body for a polished seasonal look that feels playful but still boutique-ready.",
+    "features": [
+      "Alternating red, white, and green crystal rows",
+      "Full-body rhinestone coverage",
+      "Holiday stripe layout",
+      "Silver metal top with red ignition button visible",
+      "Bright handmade accessory finish"
+    ],
+    "details": {
+      "mainColor": "Multicolor",
+      "accentColors": [
+        "Red",
+        "White",
+        "Green"
+      ],
+      "finish": "Faceted rhinestone crystal",
+      "style": "Holiday / candy cane / striped"
+    },
+    "tags": [
+      "holiday",
+      "christmas",
+      "candy cane",
+      "stripe",
+      "red",
+      "green",
+      "lighter"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-candy-cane-stripe-lighter-01.webp",
+        "alt": "Candy Cane Stripe Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-candy-cane-stripe-lighter-thumb.webp",
+    "imageAlt": "Candy Cane Stripe Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Candy Cane Stripe Lighter | JWLD",
+    "seoDescription": "A red, white, and green striped rhinestone lighter with a bright holiday candy-cane look.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Holiday Sparkle"
+  },
+  {
+    "id": "jwld-snowman-beaded-lighter",
+    "slug": "snowman-beaded-lighter",
+    "sku": "JWLD-LTR-HOL-004",
+    "name": "Snowman Beaded Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2600,
+    "source": "snowman_themed_decorative_lighter_on_beige_backgro.png",
+    "image": "jwld-snowman-beaded-lighter-01.webp",
+    "shortDescription": "A white beaded snowman lighter with a black hat, bead-button details, and a tiny orange nose.",
+    "description": "The Snowman Beaded Lighter is cute, clean, and instantly recognizable. Glossy white beads form the snowman body, black beadwork creates the hat, face, and buttons, and a small orange bead gives it the classic carrot-nose detail. It is an easy seasonal standout.",
+    "features": [
+      "Glossy white beaded snowman body",
+      "Black beaded hat and button details",
+      "Small orange nose accent",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated winter accessory"
+    ],
+    "details": {
+      "mainColor": "White",
+      "accentColors": [
+        "Black",
+        "Orange"
+      ],
+      "finish": "Glossy beadwork",
+      "style": "Holiday / winter / snowman"
+    },
+    "tags": [
+      "snowman",
+      "winter",
+      "holiday",
+      "white",
+      "beaded",
+      "lighter",
+      "cute"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-snowman-beaded-lighter-01.webp",
+        "alt": "Snowman Beaded Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-snowman-beaded-lighter-thumb.webp",
+    "imageAlt": "Snowman Beaded Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Snowman Beaded Lighter | JWLD",
+    "seoDescription": "A white beaded snowman lighter with a black hat, bead-button details, and a tiny orange nose.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Holiday Sparkle"
+  },
+  {
+    "id": "jwld-neon-lime-beaded-lighter",
+    "slug": "neon-lime-beaded-lighter",
+    "sku": "JWLD-LTR-BRT-001",
+    "name": "Neon Lime Beaded Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2200,
+    "source": "sparkling_neon_green_studded_lighter.png",
+    "image": "jwld-neon-lime-beaded-lighter-01.webp",
+    "shortDescription": "A solid neon-lime beaded lighter with a glossy, bright, high-energy finish.",
+    "description": "The Neon Lime Beaded Lighter keeps the design simple and loud. A full wrap of bright green beads gives it a bold pop-color look that works with playful, rave, summer, or Y2K styling.",
+    "features": [
+      "Solid neon green bead coverage",
+      "Glossy textured surface",
+      "Clean single-color design",
+      "Silver metal top with red ignition button visible",
+      "Bright everyday statement accessory"
+    ],
+    "details": {
+      "mainColor": "Neon green",
+      "accentColors": [
+        "Silver",
+        "Red"
+      ],
+      "finish": "Glossy beadwork",
+      "style": "Bright / Y2K / pop color"
+    },
+    "tags": [
+      "green",
+      "neon",
+      "lime",
+      "beaded",
+      "lighter",
+      "y2k",
+      "bright"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-neon-lime-beaded-lighter-01.webp",
+        "alt": "Neon Lime Beaded Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-neon-lime-beaded-lighter-thumb.webp",
+    "imageAlt": "Neon Lime Beaded Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Neon Lime Beaded Lighter | JWLD",
+    "seoDescription": "A solid neon-lime beaded lighter with a glossy, bright, high-energy finish.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Everyday Bling"
+  },
+  {
+    "id": "jwld-champagne-pearl-lighter",
+    "slug": "champagne-pearl-lighter",
+    "sku": "JWLD-LTR-NEU-001",
+    "name": "Champagne Pearl Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2400,
+    "source": "sparkling_beaded_lighter_on_neutral_backdrop.png",
+    "image": "jwld-champagne-pearl-lighter-01.webp",
+    "shortDescription": "A soft champagne pearl beaded lighter with a clean neutral shine and subtle iridescent glow.",
+    "description": "The Champagne Pearl Lighter is the clean neutral option in the lineup. Pale cream and champagne-toned beads create a soft pearled look with just enough shimmer to feel polished, minimal, and gift-ready.",
+    "features": [
+      "Champagne and cream pearl-style bead coverage",
+      "Soft iridescent highlights",
+      "Minimal neutral design",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated boutique accessory"
+    ],
+    "details": {
+      "mainColor": "Champagne pearl",
+      "accentColors": [
+        "Cream",
+        "Ivory",
+        "Silver"
+      ],
+      "finish": "Pearl-style glossy beadwork",
+      "style": "Minimal / neutral / soft glam"
+    },
+    "tags": [
+      "champagne",
+      "pearl",
+      "neutral",
+      "cream",
+      "beaded",
+      "lighter",
+      "minimal"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-champagne-pearl-lighter-01.webp",
+        "alt": "Champagne Pearl Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-champagne-pearl-lighter-thumb.webp",
+    "imageAlt": "Champagne Pearl Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Champagne Pearl Lighter | JWLD",
+    "seoDescription": "A soft champagne pearl beaded lighter with a clean neutral shine and subtle iridescent glow.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Everyday Bling"
+  },
+  {
+    "id": "jwld-baby-blue-beaded-lighter",
+    "slug": "baby-blue-beaded-lighter",
+    "sku": "JWLD-LTR-PST-001",
+    "name": "Baby Blue Beaded Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2200,
+    "source": "beaded_design_lighter_with_metallic_accents.png",
+    "image": "jwld-baby-blue-beaded-lighter-01.webp",
+    "shortDescription": "A pastel baby-blue beaded lighter with a soft glossy finish and clean full-wrap design.",
+    "description": "The Baby Blue Beaded Lighter is simple, bright, and easy to style. Smooth pastel blue beads cover the full body for a clean monochrome look with soft shine and a handmade texture.",
+    "features": [
+      "Solid pastel blue bead coverage",
+      "Glossy full-wrap finish",
+      "Clean monochrome design",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated everyday accessory"
+    ],
+    "details": {
+      "mainColor": "Baby blue",
+      "accentColors": [
+        "Silver",
+        "Red"
+      ],
+      "finish": "Glossy beadwork",
+      "style": "Pastel / clean / cute"
+    },
+    "tags": [
+      "blue",
+      "pastel",
+      "baby blue",
+      "beaded",
+      "lighter",
+      "cute",
+      "minimal"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-baby-blue-beaded-lighter-01.webp",
+        "alt": "Baby Blue Beaded Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-baby-blue-beaded-lighter-thumb.webp",
+    "imageAlt": "Baby Blue Beaded Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Baby Blue Beaded Lighter | JWLD",
+    "seoDescription": "A pastel baby-blue beaded lighter with a soft glossy finish and clean full-wrap design.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Cute Chaos"
+  },
+  {
+    "id": "jwld-rainbow-kitty-crystal-lighter",
+    "slug": "rainbow-kitty-crystal-lighter",
+    "sku": "JWLD-LTR-CUTE-001",
+    "name": "Rainbow Kitty Crystal Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2800,
+    "source": "sparkling_cat_themed_rhinestone_lighter.png",
+    "image": "jwld-rainbow-kitty-crystal-lighter-01.webp",
+    "shortDescription": "A pink rhinestone lighter with rainbow crystal sections and cute kitty-face details down the front.",
+    "description": "The Rainbow Kitty Crystal Lighter is the cute statement piece. A soft pink crystal base gets layered with rainbow color sections and tiny kitty-face details, giving it a playful Sanrio-style energy without losing the polished rhinestone shine.",
+    "features": [
+      "Pink rhinestone body",
+      "Rainbow crystal color sections",
+      "Cute kitty-face detail accents",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated playful statement accessory"
+    ],
+    "details": {
+      "mainColor": "Pink",
+      "accentColors": [
+        "Rainbow",
+        "White",
+        "Black"
+      ],
+      "finish": "Faceted rhinestone crystal",
+      "style": "Cute / pastel / kawaii / rainbow"
+    },
+    "tags": [
+      "kitty",
+      "cat",
+      "rainbow",
+      "pink",
+      "cute",
+      "rhinestone",
+      "lighter"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-rainbow-kitty-crystal-lighter-01.webp",
+        "alt": "Rainbow Kitty Crystal Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-rainbow-kitty-crystal-lighter-thumb.webp",
+    "imageAlt": "Rainbow Kitty Crystal Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Rainbow Kitty Crystal Lighter | JWLD",
+    "seoDescription": "A pink rhinestone lighter with rainbow crystal sections and cute kitty-face details down the front.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Cute Chaos"
+  },
+  {
+    "id": "jwld-midnight-star-scatter-lighter",
+    "slug": "midnight-star-scatter-lighter",
+    "sku": "JWLD-LTR-GLM-001",
+    "name": "Midnight Star Scatter Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2800,
+    "source": "sparkling_jeweled_disposable_lighter.png",
+    "image": "jwld-midnight-star-scatter-lighter-01.webp",
+    "shortDescription": "A black rhinestone lighter scattered with colorful crystal stars for a glossy night-sky look.",
+    "description": "The Midnight Star Scatter Lighter is dark, glossy, and full of color hits. Black rhinestones cover the body while multicolor star accents pop across the front, creating a night-sky effect that feels glam, playful, and slightly edgy.",
+    "features": [
+      "Glossy black rhinestone body",
+      "Multicolor crystal star accents",
+      "Night-sky scatter layout",
+      "Silver metal top with red ignition button visible",
+      "High-shine hand-decorated finish"
+    ],
+    "details": {
+      "mainColor": "Black",
+      "accentColors": [
+        "Pink",
+        "Blue",
+        "Purple",
+        "Green",
+        "Gold",
+        "Silver"
+      ],
+      "finish": "Faceted rhinestone crystal",
+      "style": "Glam / starry / edgy"
+    },
+    "tags": [
+      "black",
+      "stars",
+      "night sky",
+      "rhinestone",
+      "colorful",
+      "lighter",
+      "glam"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-midnight-star-scatter-lighter-01.webp",
+        "alt": "Midnight Star Scatter Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-midnight-star-scatter-lighter-thumb.webp",
+    "imageAlt": "Midnight Star Scatter Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Midnight Star Scatter Lighter | JWLD",
+    "seoDescription": "A black rhinestone lighter scattered with colorful crystal stars for a glossy night-sky look.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Dark Glam"
+  },
+  {
+    "id": "jwld-sunflower-yellow-beaded-lighter",
+    "slug": "sunflower-yellow-beaded-lighter",
+    "sku": "JWLD-LTR-FLR-001",
+    "name": "Sunflower Yellow Beaded Lighter",
+    "category": "Decorated Lighters",
+    "type": "lighter",
+    "priceCents": 2800,
+    "source": "decorative_beaded_lighter_with_sunflowers.png",
+    "image": "jwld-sunflower-yellow-beaded-lighter-01.webp",
+    "shortDescription": "A bright yellow beaded lighter with stacked sunflower designs and green leaf accents.",
+    "description": "The Sunflower Yellow Beaded Lighter is bright, warm, and handmade-looking in the best way. Yellow beads cover the body while stacked sunflower motifs add brown centers, orange-yellow petals, and small green leaf accents for a sunny floral finish.",
+    "features": [
+      "Bright yellow beaded body",
+      "Stacked sunflower bead motifs",
+      "Green leaf accent details",
+      "Silver metal top with red ignition button visible",
+      "Hand-decorated floral statement accessory"
+    ],
+    "details": {
+      "mainColor": "Yellow",
+      "accentColors": [
+        "Orange",
+        "Brown",
+        "Green"
+      ],
+      "finish": "Glossy beadwork",
+      "style": "Floral / sunny / handmade"
+    },
+    "tags": [
+      "sunflower",
+      "yellow",
+      "floral",
+      "beaded",
+      "lighter",
+      "bright",
+      "summer"
+    ],
+    "images": [
+      {
+        "src": "/products/jwld-sunflower-yellow-beaded-lighter-01.webp",
+        "alt": "Sunflower Yellow Beaded Lighter product photo"
+      }
+    ],
+    "thumbnail": "/products/jwld-sunflower-yellow-beaded-lighter-thumb.webp",
+    "imageAlt": "Sunflower Yellow Beaded Lighter product photo",
+    "currency": "USD",
+    "inventoryQuantity": 1,
+    "status": "active",
+    "featured": false,
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "seoTitle": "Sunflower Yellow Beaded Lighter | JWLD",
+    "seoDescription": "A bright yellow beaded lighter with stacked sunflower designs and green leaf accents.",
+    "createdAt": "2026-05-03",
+    "updatedAt": "2026-05-03",
+    "collection": "Flower Shop"
+  }
+]

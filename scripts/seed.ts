@@ -13,18 +13,26 @@ const db = drizzle(sql, { schema })
 
 type CatalogProduct = (typeof productCatalog)[number]
 
-const CATEGORY_MAP: Record<CatalogProduct["category"], string> = {
+type ProductCategory = "Lighter" | "Container"
+type SeedCatalogProduct = CatalogProduct & {
+  category: ProductCategory
+  priceCents?: number
+  stock?: number
+  featured?: boolean
+}
+
+const CATEGORY_MAP: Record<ProductCategory, string> = {
   Lighter: "bejeweled-lighters",
   Container: "small-cases",
 }
 
 const FEATURED_SKUS = new Set(["JWLD-001", "JWLD-002", "JWLD-015", "JWLD-018"])
 
-function priceForProduct(product: CatalogProduct) {
-  return product.category === "Container" ? 1800 : 2800
+function priceForProduct(product: SeedCatalogProduct) {
+  return product.priceCents ?? (product.category === "Container" ? 1800 : 2800)
 }
 
-function imagePath(product: CatalogProduct) {
+function imagePath(product: SeedCatalogProduct) {
   return `/products/${product.images.webp}`
 }
 
@@ -36,15 +44,15 @@ async function seed() {
 
   console.log("Upserting products from public/products/metadata/jwld_product_catalog.json...")
 
-  const values = productCatalog.map((product) => ({
+  const values = (productCatalog as SeedCatalogProduct[]).map((product) => ({
     slug: product.slug,
     name: product.name,
     description: product.description,
     category: CATEGORY_MAP[product.category],
     priceCents: priceForProduct(product),
     images: [imagePath(product)],
-    stock: 1,
-    featured: FEATURED_SKUS.has(product.sku),
+    stock: product.stock ?? 1,
+    featured: product.featured ?? FEATURED_SKUS.has(product.sku),
     active: true,
   }))
 
