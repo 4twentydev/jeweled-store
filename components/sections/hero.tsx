@@ -24,7 +24,7 @@ export function Hero() {
       <div className="relative z-10 mt-auto max-w-[1400px] mx-auto w-full px-6 lg:px-12 pb-24 md:pb-36">
         <div className="max-w-[560px]">
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="text-[10px] tracking-[0.35em] uppercase text-muted-foreground mb-7"
@@ -33,7 +33,7 @@ export function Hero() {
           </motion.p>
 
           <motion.h1
-            initial={{ opacity: 0, y: 28 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
             className="font-light tracking-tight text-foreground leading-[1.04] mb-12"
@@ -43,7 +43,7 @@ export function Hero() {
           </motion.h1>
 
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.32 }}
           >
