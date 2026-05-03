@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 const CATEGORIES = [
   { slug: "bejeweled-lighters", label: "Lighters" },
   { slug: "lighter-cases", label: "Lighter Cases" },
-  { slug: "small-cases", label: "Small Cases" },
+  { slug: "small-cases", label: "Small Containers" },
   { slug: "lip-balms", label: "Lip Balms" },
   { slug: "lotions", label: "Lotions" },
   { slug: "custom-rhinestone-items", label: "Custom" },

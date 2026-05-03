@@ -3,7 +3,7 @@ import Link from "next/link"
 const SHOP_LINKS = [
   { label: "Lighters", href: "/products?category=lighters" },
   { label: "Lighter Cases", href: "/products?category=lighter-cases" },
-  { label: "Small Cases", href: "/products?category=small-cases" },
+  { label: "Small Containers", href: "/products?category=small-cases" },
   { label: "Beauty", href: "/products?category=beauty" },
 ]
 

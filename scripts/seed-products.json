@@ -110,7 +110,7 @@
   {
     "name": "Gilded Lily Small Case",
     "slug": "gilded-lily-small-case",
-    "category": "small cases",
+    "category": "small containers",
     "short_description": "A compact rectangular case with floral crystal motifs.",
     "long_description": "Perfect for jewelry, mints, or small essentials, the Gilded Lily Small Case is a masterpiece of miniature design. The lid features an intricate lily motif crafted from gold and pearl-finish crystals. The interior is lined with plush velvet to protect your most precious items.",
     "price_in_cents": 14500,
@@ -122,7 +122,7 @@
   {
     "name": "Velvet Night Pill Box",
     "slug": "velvet-night-pill-box",
-    "category": "small cases",
+    "category": "small containers",
     "short_description": "Sleek oval pill box encrusted in deep navy crystals.",
     "long_description": "Discretion meets decadence. The Velvet Night Pill Box is a slim, palm-sized container encrusted in deep sapphire and navy crystals. It clicks shut with a satisfying precision and fits effortlessly into the smallest evening clutch. A practical item turned into a private luxury.",
     "price_in_cents": 12500,
@@ -134,7 +134,7 @@
   {
     "name": "Starlet Compact Mirror",
     "slug": "starlet-compact-mirror",
-    "category": "small cases",
+    "category": "small containers",
     "short_description": "Double-sided mirror with a starburst crystal exterior.",
     "long_description": "The Starlet Compact is designed for the spotlight. The exterior features a dramatic starburst pattern of varying crystal sizes, radiating from a central large stone. Inside, you'll find a standard and a 2x magnifying mirror, ensuring you're always ready for your close-up.",
     "price_in_cents": 15500,

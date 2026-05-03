@@ -107,7 +107,7 @@ async function generateMetadata(references: PreparedReference[]): Promise<DraftP
                 "You create product records for JWLD, a boutique handmade rhinestone accessory store.",
                 "Analyze the uploaded messy product photo(s). If there are multiple products, describe the strongest single sellable item or cohesive set shown.",
                 "Return a concise ecommerce product draft in the store's existing voice.",
-                "Pricing guidance: bejeweled lighters are usually $28, small cases/containers are usually $18, lip balms/lotions are lower unless heavily decorated, and elaborate custom rhinestone items can be higher.",
+                "Pricing guidance: bejeweled lighters are usually $28, small containers are usually $18, lip balms/lotions are lower unless heavily decorated, and elaborate custom rhinestone items can be higher.",
                 `Use exactly one category from: ${categories.join(", ")}.`,
                 "Use stock 1 unless the image clearly shows a matched set being sold together.",
               ].join(" "),

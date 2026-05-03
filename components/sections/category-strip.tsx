@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { FadeUp } from "@/components/fade-up"
 import { PLACEHOLDER_CATEGORIES } from "@/lib/placeholder-data"
@@ -32,9 +33,17 @@ export function CategoryStrip() {
                   "group relative flex flex-col justify-end p-6 lg:p-8 overflow-hidden min-h-[200px] lg:min-h-[300px]"
                 )}
               >
+                <Image
+                  src={cat.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 17vw"
+                  className="object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-85"
+                />
+                <div className="absolute inset-0 bg-black/45" />
                 {/* Base gradient */}
                 <div
-                  className="absolute inset-0"
+                  className="absolute inset-0 mix-blend-screen"
                   style={{ background: `${cat.gradient}, #050505` }}
                 />
                 {/* Hover intensification */}

@@ -19,7 +19,7 @@ const GRADIENT_MAP: Record<string, string> = {
 const CATEGORY_LABEL: Record<string, string> = {
   "bejeweled-lighters": "Lighters",
   "lighter-cases": "Lighter Cases",
-  "small-cases": "Small Cases",
+  "small-cases": "Small Containers",
   "lip-balms": "Lip Balms",
   lotions: "Lotions",
   "custom-rhinestone-items": "Custom",

@@ -12,6 +12,7 @@ export type PlaceholderCategory = {
   slug: string
   label: string
   description: string
+  image: string
   gradient: string
   hoverGradient: string
 }
@@ -39,7 +40,7 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     slug: "rhinestone-pillbox-onyx",
     name: "Rhinestone Pillbox — Onyx",
     category: "small-cases",
-    categoryLabel: "Small Cases",
+    categoryLabel: "Small Containers",
     priceCents: 18500,
     badge: "New",
   },
@@ -75,6 +76,7 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
     slug: "bejeweled-lighters",
     label: "Lighters",
     description: "Fully bejeweled lighter bodies",
+    image: "/lighters.png",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(212,175,55,0.11) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(212,175,55,0.2) 0%, transparent 65%)",
   },
@@ -82,13 +84,15 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
     slug: "lighter-cases",
     label: "Lighter Cases",
     description: "Interchangeable rhinestone sleeves",
+    image: "/lighter-cases.png",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(200,162,200,0.11) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(200,162,200,0.2) 0%, transparent 65%)",
   },
   {
     slug: "small-cases",
-    label: "Small Cases",
+    label: "Small Containers",
     description: "Pillboxes, compacts, mirrors",
+    image: "/small-cases.png",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(125,249,255,0.07) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(125,249,255,0.14) 0%, transparent 65%)",
   },
@@ -96,6 +100,7 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
     slug: "lip-balms",
     label: "Lip Balms",
     description: "Crystal-encrusted lip care",
+    image: "/lip-balm.png",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.09) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.18) 0%, transparent 65%)",
   },
@@ -103,6 +108,7 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
     slug: "lotions",
     label: "Lotions",
     description: "Shimmer-infused body care",
+    image: "/lotions.png",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.09) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(255,92,168,0.18) 0%, transparent 65%)",
   },
@@ -110,6 +116,7 @@ export const PLACEHOLDER_CATEGORIES: PlaceholderCategory[] = [
     slug: "custom-rhinestone-items",
     label: "Custom",
     description: "Bespoke commissions",
+    image: "/custom.png",
     gradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(247,244,239,0.04) 0%, transparent 65%)",
     hoverGradient: "radial-gradient(ellipse 60% 70% at 50% 40%, rgba(247,244,239,0.09) 0%, transparent 65%)",
   },

@@ -7,7 +7,7 @@ export const MAX_CART_STORAGE_ITEMS = 50
 export const PRODUCT_CATEGORIES = [
   { value: "bejeweled-lighters", label: "Bejeweled Lighters" },
   { value: "lighter-cases", label: "Lighter Cases" },
-  { value: "small-cases", label: "Small Cases" },
+  { value: "small-cases", label: "Small Containers" },
   { value: "lip-balms", label: "Lip Balms" },
   { value: "lotions", label: "Lotions" },
   { value: "custom-rhinestone-items", label: "Custom Rhinestone Items" },

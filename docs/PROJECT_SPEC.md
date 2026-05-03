@@ -8,7 +8,7 @@
 ## 1. Product Categories
 * **Lighters:** Pre-designed, fully bejeweled luxury lighters.
 * **Lighter Cases:** Interchangeable rhinestone and precious-metal-finish sleeves.
-* **Small Cases:** Bejeweled pillboxes, cardholders, and compacts.
+* **Small Containers:** Bejeweled pillboxes, cardholders, and compacts.
 * **Beauty:** Crystal-encrusted lip balms and premium lotion dispensers.
 * **Custom Commissions:** Bespoke rhinestone application services for user-supplied or custom-ordered items.
 
