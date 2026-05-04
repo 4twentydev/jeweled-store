@@ -7,21 +7,21 @@ import { ArrowRight } from "lucide-react";
 
 export function Hero() {
     return (
-        <section className="relative min-h-[92vh] flex flex-col overflow-hidden">
+        <section className="relative min-h-[82svh] md:min-h-[92vh] flex flex-col overflow-hidden">
             {/* Hero background image */}
             <Image
                 src="/hero.png"
                 alt=""
                 fill
                 priority
-                className="object-cover object-center"
+                className="object-cover object-[63%_center] md:object-center"
                 sizes="100vw"
             />
             {/* Dark overlay for text legibility */}
-            <div className="absolute inset-0 bg-black/55" />
+            <div className="absolute inset-0 bg-black/60 md:bg-black/55" />
 
             {/* Content — bottom-left anchored */}
-            <div className="relative z-10 mt-auto max-w-[1400px] mx-auto w-full px-6 lg:px-12 pb-24 md:pb-36">
+            <div className="relative z-10 mt-auto max-w-[1400px] mx-auto w-full px-6 lg:px-12 pb-20 md:pb-36">
                 <div className="max-w-[560px]">
                     <motion.p
                         initial={false}
