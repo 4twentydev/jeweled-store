@@ -265,7 +265,7 @@ export async function POST(req: Request) {
     const productImage = await generateCatalogImage(references, draft)
     const webpImage = await sharp(productImage)
       .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 92 })
+      .webp({ quality: 86 })
       .toBuffer()
 
     const filename = `products/${crypto.randomUUID()}-${draft.slug || "ai-product"}.webp`

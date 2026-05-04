@@ -3,7 +3,7 @@ import { sql as drizzleSql } from "drizzle-orm"
 import { neon } from "@neondatabase/serverless"
 import { drizzle } from "drizzle-orm/neon-http"
 import * as schema from "../db/schema"
-import productCatalog from "../public/products/metadata/jwld_product_catalog.json"
+import productCatalog from "../data/products/metadata/jwld_product_catalog.json"
 
 config({ path: ".env.local", quiet: true })
 config({ quiet: true })
@@ -32,17 +32,13 @@ function priceForProduct(product: SeedCatalogProduct) {
   return product.priceCents ?? (product.category === "Container" ? 1800 : 2800)
 }
 
-function imagePath(product: SeedCatalogProduct) {
-  return `/products/${product.images.webp}`
-}
-
 async function seed() {
   if (process.env.NODE_ENV === "production") {
     console.error("ERROR: seed must not run against production. Aborting.")
     process.exit(1)
   }
 
-  console.log("Upserting products from public/products/metadata/jwld_product_catalog.json...")
+  console.log("Upserting products from data/products/metadata/jwld_product_catalog.json...")
 
   const values = (productCatalog as SeedCatalogProduct[]).map((product) => ({
     slug: product.slug,
@@ -50,7 +46,7 @@ async function seed() {
     description: product.description,
     category: CATEGORY_MAP[product.category],
     priceCents: priceForProduct(product),
-    images: [imagePath(product)],
+    images: [],
     stock: product.stock ?? 1,
     featured: product.featured ?? FEATURED_SKUS.has(product.sku),
     active: true,
@@ -66,7 +62,6 @@ async function seed() {
         description: drizzleSql`excluded.description`,
         category: drizzleSql`excluded.category`,
         priceCents: drizzleSql`excluded.price_cents`,
-        images: drizzleSql`excluded.images`,
         stock: drizzleSql`excluded.stock`,
         featured: drizzleSql`excluded.featured`,
         active: drizzleSql`excluded.active`,

@@ -12,16 +12,10 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/avif",
 ])
 
-const MIME_TO_EXT: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/avif": "avif",
-}
-
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB
 const MAX_DIMENSION = 8000
+const OUTPUT_DIMENSION = 1600
+const OUTPUT_QUALITY = 86
 
 // Magic-byte signatures for each allowed type
 function matchesMagicBytes(buf: Uint8Array, mimeType: string): boolean {
@@ -133,14 +127,33 @@ export async function POST(req: Request) {
     )
   }
 
-  const ext = MIME_TO_EXT[declaredMime]
-  const filename = `products/${crypto.randomUUID()}.${ext}`
+  let optimized: Buffer
+  try {
+    optimized = await sharp(Buffer.from(arrayBuf))
+      .rotate()
+      .resize({
+        width: OUTPUT_DIMENSION,
+        height: OUTPUT_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: OUTPUT_QUALITY })
+      .toBuffer()
+  } catch (err) {
+    console.error("[admin upload] image optimization failed:", err)
+    return NextResponse.json(
+      { error: "Image optimization failed" },
+      { status: 422 }
+    )
+  }
+
+  const filename = `products/${crypto.randomUUID()}.webp`
 
   let blob: Awaited<ReturnType<typeof put>>
   try {
-    blob = await put(filename, file, {
+    blob = await put(filename, optimized, {
       access: "public",
-      contentType: declaredMime,
+      contentType: "image/webp",
     })
   } catch (err) {
     console.error("[admin upload] blob put failed:", err)
