@@ -1066,5 +1066,323 @@
     "seoDescription": "A bright yellow beaded lighter with stacked sunflower designs and green leaf accents.",
     "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
     "altText": "Sunflower Yellow Beaded Lighter product photo"
+  },
+  {
+    "sku": "JWLD-CNT-301",
+    "name": "Lilac Candy Molecule Container",
+    "slug": "lilac-candy-molecule-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "lilac, black, pink, lime, white, purple",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/lilac-candy-molecule-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/lilac-candy-molecule-container-thumb.webp"
+    },
+    "shortDescription": "Glossy lilac beaded round container with a playful candy-molecule front design.",
+    "description": "Add a playful pop to any setup with the Lilac Candy Molecule Container. This compact round piece features glossy lilac beadwork wrapped around a black center panel, finished with a colorful candy-inspired molecular motif for a fun Y2K vibe. It is bright, quirky, and made to stand out on a shelf, in a bag, or as part of a curated accessory set.",
+    "features": [
+      "Compact round decorative container design",
+      "Lilac beaded exterior with black center panel",
+      "Colorful candy-molecule inspired accent on the face",
+      "Fun statement piece for playful collections",
+      "Handmade-style finish with slight variation in bead placement"
+    ],
+    "details": {
+      "mainColor": "lilac",
+      "accentColors": [
+        "black",
+        "pink",
+        "lime",
+        "white",
+        "purple"
+      ],
+      "finish": "beads, decorative resin accents, plastic base",
+      "style": "beaded / playful / y2k / candy / lilac"
+    },
+    "tags": [
+      "container",
+      "beaded",
+      "playful",
+      "y2k",
+      "candy",
+      "lilac"
+    ],
+    "priceCents": 1699,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Lilac Candy Molecule Container | JWLD",
+    "seoDescription": "Shop the Lilac Candy Molecule Container, a playful beaded round accessory with glossy lilac detailing and a candy-inspired front design.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Glossy lilac beaded round container with a playful candy-molecule front design."
+  },
+  {
+    "sku": "JWLD-CNT-302",
+    "name": "Sapphire Crystal Burst Container",
+    "slug": "sapphire-crystal-burst-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "cobalt blue, silver, clear crystal",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/sapphire-crystal-burst-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/sapphire-crystal-burst-container-thumb.webp"
+    },
+    "shortDescription": "Cobalt blue round container topped with a sparkling clear and sapphire crystal burst.",
+    "description": "The Sapphire Crystal Burst Container brings a clean, high-glam finish to the collection. Its rich cobalt body is paired with a face covered in clear rhinestones and deep sapphire gems arranged in a radiant floral burst pattern. The result is bold, polished, and luxe without losing its playful boutique feel.",
+    "features": [
+      "Round compact container with cobalt blue body",
+      "Front face covered in clear rhinestones and sapphire gems",
+      "Radiant crystal-burst centerpiece",
+      "Bright studio-ready sparkle and strong color contrast",
+      "Great for gifting or styled product drops"
+    ],
+    "details": {
+      "mainColor": "cobalt blue",
+      "accentColors": [
+        "silver",
+        "clear crystal"
+      ],
+      "finish": "rhinestones, decorative gems, plastic base",
+      "style": "crystal / blue / glam / statement / boutique"
+    },
+    "tags": [
+      "container",
+      "crystal",
+      "blue",
+      "glam",
+      "statement",
+      "boutique"
+    ],
+    "priceCents": 2199,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Sapphire Crystal Burst Container | JWLD",
+    "seoDescription": "Shop the Sapphire Crystal Burst Container, a cobalt blue compact accessory with clear crystals and bold sapphire floral detailing.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Cobalt blue round container topped with a sparkling clear and sapphire crystal burst."
+  },
+  {
+    "sku": "JWLD-CNT-303",
+    "name": "Aqua Sunflower Bloom Container",
+    "slug": "aqua-sunflower-bloom-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "aqua, yellow, pink, black",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/aqua-sunflower-bloom-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/aqua-sunflower-bloom-container-thumb.webp"
+    },
+    "shortDescription": "Aqua beaded round container with bright sunflower accents and soft pink details.",
+    "description": "Fresh and cheerful, the Aqua Sunflower Bloom Container mixes soft aqua beadwork with dimensional yellow sunflower accents for a bright floral finish. Pink spacer beads add extra contrast around the center arrangement, giving the piece a handmade boutique look that feels sunny, playful, and easy to style.",
+    "features": [
+      "Compact round container silhouette",
+      "Aqua beaded exterior with layered floral center",
+      "Three sunflower accents with dimensional detail",
+      "Soft pink accent beads for added contrast",
+      "Perfect for spring, summer, and floral-themed drops"
+    ],
+    "details": {
+      "mainColor": "aqua",
+      "accentColors": [
+        "yellow",
+        "pink",
+        "black"
+      ],
+      "finish": "beads, resin flowers, plastic base",
+      "style": "sunflower / floral / aqua / cute / spring"
+    },
+    "tags": [
+      "container",
+      "sunflower",
+      "floral",
+      "aqua",
+      "cute",
+      "spring"
+    ],
+    "priceCents": 1899,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Aqua Sunflower Bloom Container | JWLD",
+    "seoDescription": "Shop the Aqua Sunflower Bloom Container, a cheerful floral accessory with aqua beadwork and dimensional sunflower accents.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Aqua beaded round container with bright sunflower accents and soft pink details."
+  },
+  {
+    "sku": "JWLD-CNT-304",
+    "name": "Midnight Coral Daisy Container",
+    "slug": "midnight-coral-daisy-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "black, coral, yellow",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/midnight-coral-daisy-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/midnight-coral-daisy-container-thumb.webp"
+    },
+    "shortDescription": "Black rhinestone round container finished with a bold coral daisy centerpiece.",
+    "description": "The Midnight Coral Daisy Container pairs a dark rhinestone base with a warm coral flower for a look that feels both sweet and dramatic. The textured black surface adds shine and depth, while the oversized daisy center keeps the piece playful and eye-catching.",
+    "features": [
+      "Round compact accessory with black rhinestone finish",
+      "Large coral daisy centerpiece with yellow middle",
+      "High-contrast floral design",
+      "Great blend of edgy and cute styling",
+      "Boutique-style statement piece for curated collections"
+    ],
+    "details": {
+      "mainColor": "black",
+      "accentColors": [
+        "coral",
+        "yellow"
+      ],
+      "finish": "rhinestones, resin flower, plastic base",
+      "style": "black / floral / daisy / edgy / cute"
+    },
+    "tags": [
+      "container",
+      "black",
+      "floral",
+      "daisy",
+      "edgy",
+      "cute"
+    ],
+    "priceCents": 1799,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Midnight Coral Daisy Container | JWLD",
+    "seoDescription": "Shop the Midnight Coral Daisy Container, a black rhinestone compact finished with a bold coral floral centerpiece.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Black rhinestone round container finished with a bold coral daisy centerpiece."
+  },
+  {
+    "sku": "JWLD-CNT-305",
+    "name": "Tangerine Garden Bloom Container",
+    "slug": "tangerine-garden-bloom-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "tangerine, mint, pink, yellow, black",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/tangerine-garden-bloom-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/tangerine-garden-bloom-container-thumb.webp"
+    },
+    "shortDescription": "Bright tangerine beaded round container with a pastel garden bouquet centerpiece.",
+    "description": "Packed with cheerful color, the Tangerine Garden Bloom Container features a vibrant orange beaded border wrapped around a pastel floral bouquet center. Mint, pink, and yellow flowers create a lively garden-inspired composition that gives the piece a whimsical handmade feel.",
+    "features": [
+      "Compact round container with bold orange beadwork",
+      "Pastel floral centerpiece in mint, pink, and yellow",
+      "Deep black framing and tiny blue accents for contrast",
+      "Colorful statement piece with playful boutique energy",
+      "Ideal for bright seasonal collections"
+    ],
+    "details": {
+      "mainColor": "tangerine",
+      "accentColors": [
+        "mint",
+        "pink",
+        "yellow",
+        "black"
+      ],
+      "finish": "beads, resin flowers, plastic base",
+      "style": "floral / orange / pastel / garden / cute"
+    },
+    "tags": [
+      "container",
+      "floral",
+      "orange",
+      "pastel",
+      "garden",
+      "cute"
+    ],
+    "priceCents": 1899,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Tangerine Garden Bloom Container | JWLD",
+    "seoDescription": "Shop the Tangerine Garden Bloom Container, a bright beaded accessory with a pastel floral bouquet centerpiece.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Bright tangerine beaded round container with a pastel garden bouquet centerpiece."
+  },
+  {
+    "sku": "JWLD-CNT-306",
+    "name": "Blush Daisy Noir Container",
+    "slug": "blush-daisy-noir-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "black, blush pink, yellow",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/blush-daisy-noir-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/blush-daisy-noir-container-thumb.webp"
+    },
+    "shortDescription": "Black crystal round container with a soft blush daisy front detail.",
+    "description": "The Blush Daisy Noir Container keeps the shape clean and the contrast strong. A bed of black crystals sets the stage for a glossy blush-pink daisy with a bright yellow center, creating a simple floral statement that feels polished, feminine, and easy to pair with almost anything.",
+    "features": [
+      "Round compact design with black crystal finish",
+      "Glossy blush daisy centerpiece",
+      "Soft pink and yellow tones against a deep black base",
+      "Minimal but eye-catching floral styling",
+      "Perfect for everyday boutique product mixes"
+    ],
+    "details": {
+      "mainColor": "black",
+      "accentColors": [
+        "blush pink",
+        "yellow"
+      ],
+      "finish": "rhinestones, resin flower, plastic base",
+      "style": "pink flower / black / cute / minimal glam"
+    },
+    "tags": [
+      "container",
+      "pink flower",
+      "black",
+      "cute",
+      "minimal glam"
+    ],
+    "priceCents": 1799,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Blush Daisy Noir Container | JWLD",
+    "seoDescription": "Shop the Blush Daisy Noir Container, a black crystal compact with a soft blush daisy centerpiece and polished floral style.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Black crystal round container with a soft blush daisy front detail."
+  },
+  {
+    "sku": "JWLD-CNT-307",
+    "name": "Violet Rose Noir Container",
+    "slug": "violet-rose-noir-container",
+    "category": "Container",
+    "collection": "jwld-containers-batch-01",
+    "color": "violet, black",
+    "images": {
+      "webp": "jwld_round_containers_batch01_REBUILT/images/violet-rose-noir-container.webp",
+      "thumbnail": "jwld_round_containers_batch01_REBUILT/images/thumbs/violet-rose-noir-container-thumb.webp"
+    },
+    "shortDescription": "Violet crystal round container with a black rose trio centerpiece.",
+    "description": "Moody and polished, the Violet Rose Noir Container combines rich purple rhinestones with a dramatic black floral center. Three glossy black roses create a striking focal point, giving the piece a dark romantic edge while still keeping the overall silhouette sleek and boutique-ready.",
+    "features": [
+      "Compact round container with violet crystal exterior",
+      "Black floral center featuring three dimensional roses",
+      "Dark romantic styling with strong contrast",
+      "Glossy, high-shine finish for a premium look",
+      "Ideal for goth glam or deeper color-themed collections"
+    ],
+    "details": {
+      "mainColor": "violet",
+      "accentColors": [
+        "black"
+      ],
+      "finish": "rhinestones, resin roses, plastic base",
+      "style": "rose / purple / goth glam / dark floral"
+    },
+    "tags": [
+      "container",
+      "rose",
+      "purple",
+      "goth glam",
+      "dark floral"
+    ],
+    "priceCents": 1999,
+    "stock": 5,
+    "featured": false,
+    "seoTitle": "Violet Rose Noir Container | JWLD",
+    "seoDescription": "Shop the Violet Rose Noir Container, a purple crystal compact with a dramatic black rose trio centerpiece.",
+    "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
+    "altText": "Violet crystal round container with a black rose trio centerpiece."
   }
 ]
