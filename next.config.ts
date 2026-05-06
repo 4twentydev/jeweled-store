@@ -10,12 +10,12 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://vercel.live",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live",
+      "font-src 'self' https://fonts.gstatic.com https://vercel.live https://assets.vercel.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://api.stripe.com https://*.neon.tech",
-      "frame-src https://js.stripe.com https://hooks.stripe.com",
+      "connect-src 'self' https://api.stripe.com https://*.neon.tech https://vercel.live wss://ws-us3.pusher.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://vercel.live",
     ].join("; "),
   },
 ]
