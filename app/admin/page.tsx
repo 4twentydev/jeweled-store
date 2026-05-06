@@ -1,20 +1,21 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
-import { getAdminStats } from "@/db/queries/admin"
+import { getAdminStats, getRecentNotifications } from "@/db/queries/admin"
 import { isAdmin } from "@/lib/auth"
 import { formatCurrency } from "@/lib/utils"
 
 export default async function AdminPage() {
   if (!(await isAdmin())) redirect("/admin/login")
 
-  const stats = await getAdminStats()
+  const [stats, notifications] = await Promise.all([getAdminStats(), getRecentNotifications()])
 
   const cards = [
     { label: "Total Products", value: stats.totalProducts },
     { label: "Active Products", value: stats.activeProducts },
     { label: "Total Orders", value: stats.totalOrders },
     { label: "Revenue", value: formatCurrency(stats.totalRevenueCents) },
+    { label: "Pending Notifications", value: stats.totalPendingNotifications },
   ]
 
   return (
@@ -24,7 +25,7 @@ export default async function AdminPage() {
           Overview
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 border border-border mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-5 border border-border mb-12">
           {cards.map((card, i) => (
             <div
               key={card.label}
@@ -57,6 +58,29 @@ export default async function AdminPage() {
           >
             Review Custom →
           </Link>
+        </div>
+
+        <div className="mt-12 border border-border">
+          <div className="border-b border-border px-6 py-4">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              Recent Notifications
+            </p>
+          </div>
+          <div className="divide-y divide-border/40">
+            {notifications.map((notification) => (
+              <div key={notification.id} className="flex items-center justify-between gap-4 px-6 py-4 text-sm">
+                <div>
+                  <p>{notification.subject ?? notification.kind}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {notification.recipient ?? "No recipient"}
+                  </p>
+                </div>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  {notification.status}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </AdminShell>

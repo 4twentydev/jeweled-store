@@ -1,18 +1,11 @@
 import { vi, describe, it, expect, beforeEach } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  getOrderByStripeSession: vi.fn(),
-  retrieveSession: vi.fn(),
+  getOrderBySessionAndLookupToken: vi.fn(),
 }))
 
 vi.mock("@/db/queries/orders", () => ({
-  getOrderByStripeSession: mocks.getOrderByStripeSession,
-}))
-
-vi.mock("@/lib/stripe", () => ({
-  getStripe: () => ({
-    checkout: { sessions: { retrieve: mocks.retrieveSession } },
-  }),
+  getOrderBySessionAndLookupToken: mocks.getOrderBySessionAndLookupToken,
 }))
 
 import { lookupOrderBySession } from "@/server/actions/order-lookup"
@@ -34,29 +27,28 @@ const fakeDbOrder = {
 describe("lookupOrderBySession", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.retrieveSession.mockResolvedValue({ metadata: { lookupToken: LOOKUP_TOKEN } })
   })
 
   it("returns null for empty sessionId without querying the DB", async () => {
     const result = await lookupOrderBySession("", LOOKUP_TOKEN)
     expect(result).toBeNull()
-    expect(mocks.getOrderByStripeSession).not.toHaveBeenCalled()
+    expect(mocks.getOrderBySessionAndLookupToken).not.toHaveBeenCalled()
   })
 
   it("returns null when lookup token is missing or invalid", async () => {
     expect(await lookupOrderBySession("cs_test_xxx")).toBeNull()
     expect(await lookupOrderBySession("cs_test_xxx", "wrong-token")).toBeNull()
-    expect(mocks.getOrderByStripeSession).not.toHaveBeenCalled()
+    expect(mocks.getOrderBySessionAndLookupToken).not.toHaveBeenCalled()
   })
 
   it("returns null when webhook has not yet created the order", async () => {
-    mocks.getOrderByStripeSession.mockResolvedValue(null)
+    mocks.getOrderBySessionAndLookupToken.mockResolvedValue(null)
     const result = await lookupOrderBySession("cs_test_xxx", LOOKUP_TOKEN)
     expect(result).toBeNull()
   })
 
   it("returns a shaped SuccessOrder when found", async () => {
-    mocks.getOrderByStripeSession.mockResolvedValue(fakeDbOrder)
+    mocks.getOrderBySessionAndLookupToken.mockResolvedValue(fakeDbOrder)
     const result = await lookupOrderBySession("cs_test_xxx", LOOKUP_TOKEN)
     expect(result).toEqual({
       customerEmail: "buyer@example.com",
@@ -67,7 +59,7 @@ describe("lookupOrderBySession", () => {
   })
 
   it("does not leak internal DB fields (id, stripeCheckoutSessionId, etc.)", async () => {
-    mocks.getOrderByStripeSession.mockResolvedValue(fakeDbOrder)
+    mocks.getOrderBySessionAndLookupToken.mockResolvedValue(fakeDbOrder)
     const result = await lookupOrderBySession("cs_test_xxx", LOOKUP_TOKEN)
     expect(result).not.toHaveProperty("id")
     expect(result).not.toHaveProperty("stripeCheckoutSessionId")
@@ -77,7 +69,7 @@ describe("lookupOrderBySession", () => {
   })
 
   it("handles null customer fields gracefully", async () => {
-    mocks.getOrderByStripeSession.mockResolvedValue({
+    mocks.getOrderBySessionAndLookupToken.mockResolvedValue({
       ...fakeDbOrder,
       customerEmail: null,
       customerName: null,
@@ -89,7 +81,7 @@ describe("lookupOrderBySession", () => {
 
   describe("polling simulation", () => {
     it("reflects state after webhook creates the order on a second call", async () => {
-      mocks.getOrderByStripeSession
+      mocks.getOrderBySessionAndLookupToken
         .mockResolvedValueOnce(null)         // poll 1: webhook not yet delivered
         .mockResolvedValueOnce(fakeDbOrder)  // poll 2: webhook processed
 
@@ -99,7 +91,7 @@ describe("lookupOrderBySession", () => {
     })
 
     it("reflects a subsequent status transition (e.g. new → shipped)", async () => {
-      mocks.getOrderByStripeSession
+      mocks.getOrderBySessionAndLookupToken
         .mockResolvedValueOnce(fakeDbOrder)
         .mockResolvedValueOnce({ ...fakeDbOrder, status: "shipped" })
 

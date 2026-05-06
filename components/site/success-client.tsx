@@ -15,10 +15,12 @@ function formatPrice(cents: number) {
 }
 
 export function SuccessClient({
+  canLookup,
   lookupToken,
   sessionId,
   initialOrder,
 }: {
+  canLookup: boolean
   lookupToken?: string
   sessionId: string
   initialOrder: SuccessOrder | null
@@ -30,11 +32,13 @@ export function SuccessClient({
   const startTimeRef = useRef<number>(0)
 
   useEffect(() => {
-    clearCart()
-  }, [clearCart])
+    if (canLookup || initialOrder) {
+      clearCart()
+    }
+  }, [canLookup, clearCart, initialOrder])
 
   useEffect(() => {
-    if (order || !sessionId || !lookupToken) return
+    if (order || !canLookup || !sessionId || !lookupToken) return
 
     startTimeRef.current = Date.now()
     const MAX_WAIT_MS = 30_000
@@ -62,7 +66,28 @@ export function SuccessClient({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [lookupToken, sessionId, order])
+  }, [canLookup, lookupToken, sessionId, order])
+
+  if (!canLookup) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6 px-6 text-center">
+        <CheckCircle className="size-12 text-foreground/40" strokeWidth={1.5} />
+        <div className="space-y-2">
+          <h1 className="text-sm tracking-wide">Payment Received</h1>
+          <p className="text-xs text-muted-foreground max-w-sm">
+            We could not verify the order details from this link. Contact support if you do not
+            receive a confirmation email shortly.
+          </p>
+        </div>
+        <Link
+          href="/products"
+          className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Continue Shopping
+        </Link>
+      </div>
+    )
+  }
 
   if (order) {
     const needsAttention = order.status === "cancelled"

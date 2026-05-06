@@ -4,9 +4,8 @@ import { redirect } from "next/navigation"
 import { adminLoginSchema } from "@/lib/validators"
 import { getEnv } from "@/lib/env"
 import { setAdminCookie } from "@/lib/auth"
-import { getDb } from "@/db"
 import { adminLoginAttempts } from "@/db/schema"
-import { and, count, eq, gt, lt } from "drizzle-orm"
+import { clearAttempts, isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
 
 type LoginState = { error: string } | undefined
 
@@ -37,13 +36,9 @@ async function verifyPasswordConstantTime(submitted: string): Promise<boolean> {
 
 async function countRecentFailures(ip: string): Promise<number> {
   try {
-    const db = getDb()
-    const windowStart = new Date(Date.now() - WINDOW_MS)
-    const rows = await db
-      .select({ n: count() })
-      .from(adminLoginAttempts)
-      .where(and(eq(adminLoginAttempts.ip, ip), gt(adminLoginAttempts.attemptedAt, windowStart)))
-    return rows[0]?.n ?? 0
+    return (await isRateLimited(adminLoginAttempts, ip, MAX_ATTEMPTS, WINDOW_MS))
+      ? MAX_ATTEMPTS
+      : 0
   } catch {
     // DB unavailable — fail open to preserve admin access; rate limiting is defense-in-depth
     return 0
@@ -52,12 +47,7 @@ async function countRecentFailures(ip: string): Promise<number> {
 
 async function recordFailure(ip: string): Promise<void> {
   try {
-    const db = getDb()
-    const expiry = new Date(Date.now() - WINDOW_MS)
-    await db.batch([
-      db.insert(adminLoginAttempts).values({ ip }),
-      db.delete(adminLoginAttempts).where(lt(adminLoginAttempts.attemptedAt, expiry)),
-    ])
+    await recordAttempt(adminLoginAttempts, ip, WINDOW_MS)
   } catch {
     // non-fatal — rate limit state is best-effort
   }
@@ -65,8 +55,7 @@ async function recordFailure(ip: string): Promise<void> {
 
 async function clearFailures(ip: string): Promise<void> {
   try {
-    const db = getDb()
-    await db.delete(adminLoginAttempts).where(eq(adminLoginAttempts.ip, ip))
+    await clearAttempts(adminLoginAttempts, ip)
   } catch {
     // non-fatal
   }
@@ -88,16 +77,24 @@ export async function adminLogin(
     return { error: "Too many attempts. Please wait 15 minutes." }
   }
 
-  const parsed = adminLoginSchema.safeParse({ password: formData.get("password") })
+  const parsed = adminLoginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  })
   if (!parsed.success) return { error: "Invalid input" }
+
+  if (parsed.data.email.trim().toLowerCase() !== getEnv().ADMIN_EMAIL.trim().toLowerCase()) {
+    await recordFailure(ip)
+    return { error: "Invalid credentials" }
+  }
 
   const valid = await verifyPasswordConstantTime(parsed.data.password)
   if (!valid) {
     await recordFailure(ip)
-    return { error: "Invalid password" }
+    return { error: "Invalid credentials" }
   }
 
   await clearFailures(ip)
-  await setAdminCookie()
+  await setAdminCookie(parsed.data.email)
   redirect("/admin")
 }

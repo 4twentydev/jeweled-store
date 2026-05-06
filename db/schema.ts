@@ -7,12 +7,20 @@ import {
   jsonb,
   uuid,
   index,
+  pgEnum,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 
 export type OrderStatus = "new" | "prep" | "assembly" | "shipping" | "shipped" | "cancelled"
 export type CustomRequestStatus = "pending" | "quoted" | "paid" | "prep" | "assembly" | "shipping" | "shipped" | "cancelled"
 export type UserRole = "admin"
+export type ProductCategory =
+  | "bejeweled-lighters"
+  | "lighter-cases"
+  | "small-cases"
+  | "lip-balms"
+  | "lotions"
+  | "custom-rhinestone-items"
 
 export type ShippingAddress = {
   name: string
@@ -23,6 +31,15 @@ export type ShippingAddress = {
   postal_code: string
   country: string
 }
+
+export const productCategoryEnum = pgEnum("product_category", [
+  "bejeweled-lighters",
+  "lighter-cases",
+  "small-cases",
+  "lip-balms",
+  "lotions",
+  "custom-rhinestone-items",
+])
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -38,7 +55,7 @@ export const products = pgTable(
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
     description: text("description").notNull(),
-    category: text("category").notNull(),
+    category: productCategoryEnum("category").$type<ProductCategory>().notNull(),
     priceCents: integer("price_cents").notNull(),
     stripePriceId: text("stripe_price_id"),
     images: jsonb("images").$type<string[]>().notNull().default([]),
@@ -59,6 +76,7 @@ export const orders = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     stripeCheckoutSessionId: text("stripe_checkout_session_id").notNull().unique(),
     stripePaymentIntentId: text("stripe_payment_intent_id"),
+    lookupToken: text("lookup_token"),
     customerEmail: text("customer_email"),
     customerName: text("customer_name"),
     status: text("status").$type<OrderStatus>().notNull().default("new"),
@@ -112,6 +130,57 @@ export const customRequestAttempts = pgTable(
     attemptedAt: timestamp("attempted_at").defaultNow().notNull(),
   },
   (t) => [index("custom_request_attempts_ip_at_idx").on(t.ip, t.attemptedAt)]
+)
+
+export const checkoutAttempts = pgTable(
+  "checkout_attempts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ip: text("ip").notNull(),
+    attemptedAt: timestamp("attempted_at").defaultNow().notNull(),
+  },
+  (t) => [index("checkout_attempts_ip_at_idx").on(t.ip, t.attemptedAt)]
+)
+
+export const productReservations = pgTable(
+  "product_reservations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reservationToken: text("reservation_token").notNull(),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id),
+    quantity: integer("quantity").notNull(),
+    customerEmail: text("customer_email").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    fulfilledAt: timestamp("fulfilled_at"),
+    releasedAt: timestamp("released_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("product_reservation_token_idx").on(t.reservationToken),
+    index("product_reservation_session_idx").on(t.stripeCheckoutSessionId),
+    index("product_reservation_expiry_idx").on(t.expiresAt),
+  ]
+)
+
+export const notificationEvents = pgTable(
+  "notification_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    kind: text("kind").notNull(),
+    channel: text("channel").notNull(),
+    recipient: text("recipient"),
+    subject: text("subject"),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+    status: text("status").notNull().default("pending"),
+    externalId: text("external_id"),
+    errorMessage: text("error_message"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    sentAt: timestamp("sent_at"),
+  },
+  (t) => [index("notification_events_kind_idx").on(t.kind, t.createdAt)]
 )
 
 export const ordersRelations = relations(orders, ({ many }) => ({

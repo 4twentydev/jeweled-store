@@ -9,11 +9,21 @@ const UUID1 = "110e8400-e29b-41d4-a716-446655440001"
 const mocks = vi.hoisted(() => ({
   selectWhere: vi.fn(),
   sessionCreate: vi.fn(),
+  transaction: vi.fn(),
+  updateWhere: vi.fn(),
+  updateSet: vi.fn(),
+  insertValues: vi.fn(),
+  insert: vi.fn(),
+  reservationUpdateWhere: vi.fn(),
+  reservationUpdateSet: vi.fn(),
+  dbUpdateWhere: vi.fn(),
 }))
 
 vi.mock("@/db", () => ({
   getDb: () => ({
     select: () => ({ from: () => ({ where: mocks.selectWhere }) }),
+    transaction: mocks.transaction,
+    update: () => ({ set: mocks.reservationUpdateSet }),
   }),
 }))
 
@@ -25,6 +35,17 @@ vi.mock("@/lib/stripe", () => ({
 
 vi.mock("@/lib/env", () => ({
   getEnv: () => ({ NEXT_PUBLIC_APP_URL: "https://example.com" }),
+}))
+
+vi.mock("@/lib/db-rate-limit", () => ({
+  isRateLimited: vi.fn().mockResolvedValue(false),
+  recordAttempt: vi.fn().mockResolvedValue(undefined),
+}))
+
+vi.mock("@/lib/reservations", () => ({
+  cleanupExpiredReservations: vi.fn().mockResolvedValue(undefined),
+  createReservationToken: vi.fn().mockReturnValue("reservation-token"),
+  getReservationExpiry: vi.fn().mockReturnValue(new Date("2026-01-01T00:30:00.000Z")),
 }))
 
 import { POST } from "@/app/api/checkout/route"
@@ -50,6 +71,18 @@ describe("POST /api/checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.sessionCreate.mockResolvedValue({ url: "https://stripe.com/checkout/test" })
+    mocks.insertValues.mockResolvedValue([])
+    mocks.insert.mockReturnValue({ values: mocks.insertValues })
+    mocks.updateWhere.mockResolvedValue([{ id: UUID1 }])
+    mocks.updateSet.mockReturnValue({ where: mocks.updateWhere })
+    mocks.reservationUpdateSet.mockReturnValue({ where: mocks.dbUpdateWhere })
+    mocks.dbUpdateWhere.mockResolvedValue([])
+    mocks.transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) =>
+      callback({
+        update: () => ({ set: mocks.updateSet }),
+        insert: mocks.insert,
+      })
+    )
   })
 
   it("rejects invalid JSON", async () => {

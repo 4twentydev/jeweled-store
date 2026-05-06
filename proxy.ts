@@ -8,14 +8,16 @@ async function verifyToken(token: string): Promise<boolean> {
   const secret = process.env.ADMIN_SECRET
   if (!secret) return false
 
-  // Token format: `admin:{issuedAt}.{hmac}`
+  // Token format: `admin:{issuedAt}:{email}.{hmac}`
   const dot = token.indexOf(".")
   if (dot === -1) return false
   const value = token.slice(0, dot)
   const sig = token.slice(dot + 1)
 
-  if (!value.startsWith("admin:")) return false
-  const issuedAt = parseInt(value.slice("admin:".length), 10)
+  const [prefix, issuedAtValue, email] = value.split(":")
+  if (prefix !== "admin" || !email) return false
+  if (email !== process.env.ADMIN_EMAIL?.trim().toLowerCase()) return false
+  const issuedAt = parseInt(issuedAtValue ?? "", 10)
   if (isNaN(issuedAt)) return false
   const now = Math.floor(Date.now() / 1000)
   if (now - issuedAt > MAX_AGE) return false

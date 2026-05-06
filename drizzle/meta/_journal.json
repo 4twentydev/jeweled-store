@@ -22,6 +22,13 @@
       "when": 1777798560000,
       "tag": "0002_custom_request_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777950000000,
+      "tag": "0003_order_lookup_reservations_notifications",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { FadeUp } from "@/components/fade-up"
+import { MAX_CUSTOM_REFERENCE_IMAGES } from "@/lib/validators"
 
 const BUDGET_OPTIONS = [
   { value: "under-200", label: "Under $200" },
@@ -15,6 +16,41 @@ export default function CustomPage() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [referenceImages, setReferenceImages] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
+
+  async function handleReferenceUpload(files: FileList | null) {
+    const selected = Array.from(files ?? []).slice(0, MAX_CUSTOM_REFERENCE_IMAGES - referenceImages.length)
+    if (selected.length === 0) return
+
+    setError(null)
+    setUploading(true)
+
+    try {
+      const uploaded: string[] = []
+      for (const file of selected) {
+        const form = new FormData()
+        form.append("file", file)
+        const res = await fetch("/api/custom-request-upload", {
+          method: "POST",
+          body: form,
+        })
+        const body = (await res.json().catch(() => ({}))) as { url?: string; error?: string }
+        if (!res.ok || !body.url) {
+          throw new Error(body.error ?? "Image upload failed")
+        }
+        uploaded.push(body.url)
+      }
+
+      setReferenceImages((current) =>
+        [...current, ...uploaded].slice(0, MAX_CUSTOM_REFERENCE_IMAGES)
+      )
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Image upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -27,9 +63,7 @@ export default function CustomPage() {
       customerEmail: (form.elements.namedItem("email") as HTMLInputElement).value,
       itemDescription: (form.elements.namedItem("description") as HTMLTextAreaElement).value,
       budgetRange: (form.elements.namedItem("budget") as HTMLSelectElement).value,
-      referenceImages: Array.from(form.querySelectorAll<HTMLInputElement>("[data-reference-image]"))
-        .map((input) => input.value.trim())
-        .filter(Boolean),
+      referenceImages,
     }
 
     try {
@@ -161,16 +195,34 @@ export default function CustomPage() {
                   Reference Images
                 </p>
                 <div className="space-y-3">
-                  {[0, 1, 2].map((i) => (
-                    <input
-                      key={i}
-                      data-reference-image
-                      type="url"
-                      inputMode="url"
-                      placeholder={i === 0 ? "https://..." : "Optional image URL"}
-                      className="w-full bg-transparent border border-border/50 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-foreground/50 transition-colors"
-                    />
-                  ))}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(event) => void handleReferenceUpload(event.target.files)}
+                    disabled={uploading || referenceImages.length >= MAX_CUSTOM_REFERENCE_IMAGES}
+                    className="w-full bg-transparent border border-border/50 px-4 py-3 text-sm text-foreground file:mr-4 file:border-0 file:bg-foreground file:px-3 file:py-2 file:text-xs file:uppercase file:tracking-[0.2em] file:text-background focus:outline-none focus:border-foreground/50 transition-colors"
+                  />
+                  {referenceImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {referenceImages.map((url) => (
+                        <button
+                          key={url}
+                          type="button"
+                          onClick={() =>
+                            setReferenceImages((current) => current.filter((item) => item !== url))
+                          }
+                          className="border border-border/50 px-3 py-2 text-left text-[11px] text-muted-foreground hover:text-foreground"
+                        >
+                          Remove uploaded image
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-[11px] text-muted-foreground/70">
+                    Upload up to {MAX_CUSTOM_REFERENCE_IMAGES} images. We store them securely for
+                    the request instead of accepting arbitrary links.
+                  </p>
                 </div>
               </div>
 
@@ -178,10 +230,10 @@ export default function CustomPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || uploading}
                 className="w-full py-3.5 text-[11px] tracking-[0.3em] uppercase bg-foreground text-background hover:bg-foreground/90 transition-colors disabled:opacity-60 disabled:pointer-events-none"
               >
-                {loading ? "Sending…" : "Submit Commission Request"}
+                {loading ? "Sending…" : uploading ? "Uploading…" : "Submit Commission Request"}
               </button>
             </form>
           </FadeUp>

@@ -51,6 +51,12 @@ vi.mock("@/lib/env", () => ({
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
+vi.mock("@/lib/reservations", () => ({
+  cleanupExpiredReservations: vi.fn().mockResolvedValue(undefined),
+}))
+vi.mock("@/lib/notifications", () => ({
+  processPendingNotifications: vi.fn().mockResolvedValue(undefined),
+}))
 
 import { POST } from "@/app/api/stripe/webhook/route"
 
@@ -92,11 +98,19 @@ function makeRequest(body = "raw-body", signature = "stripe-sig") {
 }
 
 // Wire sequential select responses: first call is the idempotency check
-// (orders table), second is the products fetch.
-function setupSelects(existingOrder: boolean, productList: unknown[]) {
+// (orders table), second is the active reservations lookup, third is the products fetch.
+function setupSelects(existingOrder: boolean, productList: unknown[], reservations: unknown[] = []) {
   let calls = 0
   mocks.selectWhere.mockImplementation(() =>
-    Promise.resolve(calls++ === 0 ? (existingOrder ? [{ id: "existing-id" }] : []) : productList)
+    Promise.resolve(
+      calls++ === 0
+        ? existingOrder
+          ? [{ id: "existing-id" }]
+          : []
+        : calls === 2
+          ? reservations
+          : productList
+    )
   )
 }
 

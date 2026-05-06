@@ -5,30 +5,11 @@ import { customRequestAttempts, customRequests } from "@/db/schema"
 import { getEnv } from "@/lib/env"
 import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 import { customRequestSchema } from "@/lib/validators"
-import { and, count, eq, gt, lt } from "drizzle-orm"
+import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { processPendingNotifications, queueNotification } from "@/lib/notifications"
 
 const CUSTOM_REQUEST_LIMIT = 3
 const CUSTOM_REQUEST_WINDOW_MS = 60 * 60 * 1000
-
-async function isRateLimited(ip: string): Promise<boolean> {
-  const db = getDb()
-  const windowStart = new Date(Date.now() - CUSTOM_REQUEST_WINDOW_MS)
-  const rows = await db
-    .select({ n: count() })
-    .from(customRequestAttempts)
-    .where(and(eq(customRequestAttempts.ip, ip), gt(customRequestAttempts.attemptedAt, windowStart)))
-
-  return (rows[0]?.n ?? 0) >= CUSTOM_REQUEST_LIMIT
-}
-
-async function recordAttempt(ip: string): Promise<void> {
-  const db = getDb()
-  const expiry = new Date(Date.now() - CUSTOM_REQUEST_WINDOW_MS)
-  await db.batch([
-    db.insert(customRequestAttempts).values({ ip }),
-    db.delete(customRequestAttempts).where(lt(customRequestAttempts.attemptedAt, expiry)),
-  ])
-}
 
 export async function POST(request: Request) {
   if (!isAllowedOrigin(request, getEnv().NEXT_PUBLIC_APP_URL)) {
@@ -36,12 +17,13 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request)
-  if (await isRateLimited(ip)) {
+  if (await isRateLimited(customRequestAttempts, ip, CUSTOM_REQUEST_LIMIT, CUSTOM_REQUEST_WINDOW_MS)) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
       { status: 429 }
     )
   }
+  await recordAttempt(customRequestAttempts, ip, CUSTOM_REQUEST_WINDOW_MS)
 
   let body: unknown
   try {
@@ -65,7 +47,19 @@ export async function POST(request: Request) {
     budgetRange,
     referenceImages,
   })
-  await recordAttempt(ip)
+
+  await queueNotification({
+    kind: "admin_new_custom_request",
+    channel: "admin",
+    recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
+    subject: `New custom request from ${customerName}`,
+    payload: {
+      customerName,
+      customerEmail,
+      budgetRange,
+    },
+  })
+  await processPendingNotifications()
 
   revalidatePath("/admin")
   revalidatePath("/admin/custom-requests")

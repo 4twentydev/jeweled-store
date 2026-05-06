@@ -3,11 +3,13 @@ import { revalidatePath } from "next/cache"
 import { getStripe } from "@/lib/stripe"
 import { getEnv } from "@/lib/env"
 import { getDb } from "@/db"
-import { orders, orderItems, products } from "@/db/schema"
-import { and, eq, gte, inArray, sql } from "drizzle-orm"
+import { notificationEvents, orders, orderItems, productReservations, products } from "@/db/schema"
+import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import type Stripe from "stripe"
+import { processPendingNotifications } from "@/lib/notifications"
+import { cleanupExpiredReservations } from "@/lib/reservations"
 
 function isUniqueConstraintViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && "code" in err && (err as { code: unknown }).code === "23505"
@@ -41,7 +43,42 @@ const metadataItemsSchema = z
   )
   .min(1)
 
+async function releaseReservationsBySession(sessionId: string) {
+  const db = getDb()
+  const reservations = await db
+    .select({
+      id: productReservations.id,
+      productId: productReservations.productId,
+      quantity: productReservations.quantity,
+    })
+    .from(productReservations)
+    .where(
+      and(
+        eq(productReservations.stripeCheckoutSessionId, sessionId),
+        isNull(productReservations.fulfilledAt),
+        isNull(productReservations.releasedAt)
+      )
+    )
+
+  if (reservations.length === 0) return
+
+  await db.transaction(async (tx) => {
+    for (const reservation of reservations) {
+      await tx
+        .update(products)
+        .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
+        .where(eq(products.id, reservation.productId))
+    }
+
+    await tx
+      .update(productReservations)
+      .set({ releasedAt: new Date() })
+      .where(inArray(productReservations.id, reservations.map((r) => r.id)))
+  })
+}
+
 export async function POST(request: Request) {
+  await cleanupExpiredReservations()
   const body = await request.text()
   const signature = request.headers.get("stripe-signature")
 
@@ -54,6 +91,12 @@ export async function POST(request: Request) {
     event = getStripe().webhooks.constructEvent(body, signature, getEnv().STRIPE_WEBHOOK_SECRET)
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
+  }
+
+  if (event.type === "checkout.session.expired") {
+    const expiredSession = event.data.object as Stripe.Checkout.Session
+    await releaseReservationsBySession(expiredSession.id)
+    return NextResponse.json({ received: true })
   }
 
   if (event.type !== "checkout.session.completed") {
@@ -118,6 +161,12 @@ export async function POST(request: Request) {
   const orderId = randomUUID()
   const paidProductIds = cartItems.map((i) => i.productId)
   let productSlugs: string[] = []
+  const reservationToken =
+    typeof session.metadata?.reservationToken === "string"
+      ? session.metadata.reservationToken
+      : typeof session.client_reference_id === "string"
+        ? session.client_reference_id
+        : undefined
 
   // Fast-path idempotency: skip if this session was already processed.
   // This handles sequential retries cheaply. Concurrent duplicates that race
@@ -131,6 +180,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true })
   }
 
+  const activeReservations = reservationToken
+    ? await db
+        .select()
+        .from(productReservations)
+        .where(
+          and(
+            eq(productReservations.reservationToken, reservationToken),
+            isNull(productReservations.fulfilledAt),
+            isNull(productReservations.releasedAt)
+          )
+        )
+    : []
+
   // Fetch products to determine fulfillability
   const dbProducts = await db
     .select({ id: products.id, slug: products.slug, active: products.active, stock: products.stock })
@@ -140,12 +202,18 @@ export async function POST(request: Request) {
   const productMap = new Map(dbProducts.map((p) => [p.id, p]))
   productSlugs = dbProducts.map((p) => p.slug)
 
-  const canFulfill =
-    cartItems.every((item) => productMap.get(item.productId)?.active) &&
-    cartItems.every((item) => {
-      const p = productMap.get(item.productId)
-      return p && p.stock >= item.quantity
-    })
+  const reservedQuantities = new Map(activeReservations.map((r) => [r.productId, r.quantity]))
+  const hasCompleteReservation =
+    activeReservations.length > 0 &&
+    cartItems.every((item) => reservedQuantities.get(item.productId) === item.quantity)
+
+  const canFulfill = hasCompleteReservation
+    ? cartItems.every((item) => productMap.get(item.productId)?.active)
+    : cartItems.every((item) => productMap.get(item.productId)?.active) &&
+      cartItems.every((item) => {
+        const p = productMap.get(item.productId)
+        return p && p.stock >= item.quantity
+      })
 
   const orderStatus = canFulfill ? ("new" as const) : ("cancelled" as const)
   const existingItems = cartItems.filter((item) => productMap.has(item.productId))
@@ -160,15 +228,17 @@ export async function POST(request: Request) {
   try {
     if (canFulfill) {
       await db.transaction(async (tx) => {
-        for (const item of cartItems) {
-          const decremented = await tx
-            .update(products)
-            .set({ stock: sql`${products.stock} - ${item.quantity}` })
-            .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
-            .returning({ id: products.id })
+        if (!hasCompleteReservation) {
+          for (const item of cartItems) {
+            const decremented = await tx
+              .update(products)
+              .set({ stock: sql`${products.stock} - ${item.quantity}` })
+              .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
+              .returning({ id: products.id })
 
-          if (decremented.length === 0) {
-            throw new StockDecrementFailedError()
+            if (decremented.length === 0) {
+              throw new StockDecrementFailedError()
+            }
           }
         }
 
@@ -177,6 +247,7 @@ export async function POST(request: Request) {
           stripeCheckoutSessionId: session.id,
           stripePaymentIntentId:
             typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          lookupToken: typeof session.metadata?.lookupToken === "string" ? session.metadata.lookupToken : undefined,
           customerEmail: session.customer_email ?? undefined,
           customerName: customerDetails?.name ?? undefined,
           status: "new",
@@ -194,15 +265,55 @@ export async function POST(request: Request) {
             }))
           )
         }
+
+        if (activeReservations.length > 0) {
+          await tx
+            .update(productReservations)
+            .set({ fulfilledAt: new Date(), stripeCheckoutSessionId: session.id })
+            .where(inArray(productReservations.id, activeReservations.map((r) => r.id)))
+        }
+
+        await tx.insert(notificationEvents).values([
+          {
+            kind: "order_confirmation",
+            channel: "email",
+            recipient: session.customer_email ?? null,
+            subject: `Order confirmed: ${session.id}`,
+            payload: {
+              orderId,
+              sessionId: session.id,
+              customerEmail: session.customer_email ?? null,
+              totalCents,
+            },
+            status: "pending",
+          },
+          {
+            kind: "admin_new_order",
+            channel: "admin",
+            recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
+            subject: `New order received: ${session.id}`,
+            payload: {
+              orderId,
+              sessionId: session.id,
+              customerEmail: session.customer_email ?? null,
+              totalCents,
+            },
+            status: "pending",
+          },
+        ])
       })
     } else {
       await refundUnfulfillableSession(session)
+      if (session.id) {
+        await releaseReservationsBySession(session.id)
+      }
       await db.transaction(async (tx) => {
         await tx.insert(orders).values({
           id: orderId,
           stripeCheckoutSessionId: session.id,
           stripePaymentIntentId:
             typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+          lookupToken: typeof session.metadata?.lookupToken === "string" ? session.metadata.lookupToken : undefined,
           customerEmail: session.customer_email ?? undefined,
           customerName: customerDetails?.name ?? undefined,
           status: orderStatus,
@@ -213,18 +324,53 @@ export async function POST(request: Request) {
         if (orderItemValues.length > 0) {
           await tx.insert(orderItems).values(orderItemValues)
         }
+
+        await tx.insert(notificationEvents).values([
+          {
+            kind: "order_cancelled",
+            channel: "email",
+            recipient: session.customer_email ?? null,
+            subject: `Order update: ${session.id}`,
+            payload: {
+              orderId,
+              sessionId: session.id,
+              customerEmail: session.customer_email ?? null,
+              totalCents,
+              reason: "inventory_unavailable",
+            },
+            status: "pending",
+          },
+          {
+            kind: "admin_order_cancelled",
+            channel: "admin",
+            recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
+            subject: `Order cancelled after payment: ${session.id}`,
+            payload: {
+              orderId,
+              sessionId: session.id,
+              customerEmail: session.customer_email ?? null,
+              totalCents,
+            },
+            status: "pending",
+          },
+        ])
       })
     }
   } catch (err) {
     if (err instanceof StockDecrementFailedError) {
       try {
         await refundUnfulfillableSession(session)
+        await releaseReservationsBySession(session.id)
         await db.transaction(async (tx) => {
           await tx.insert(orders).values({
             id: orderId,
             stripeCheckoutSessionId: session.id,
             stripePaymentIntentId:
               typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+            lookupToken:
+              typeof session.metadata?.lookupToken === "string"
+                ? session.metadata.lookupToken
+                : undefined,
             customerEmail: session.customer_email ?? undefined,
             customerName: customerDetails?.name ?? undefined,
             status: "cancelled",
@@ -235,6 +381,36 @@ export async function POST(request: Request) {
           if (orderItemValues.length > 0) {
             await tx.insert(orderItems).values(orderItemValues)
           }
+
+          await tx.insert(notificationEvents).values([
+            {
+              kind: "order_cancelled",
+              channel: "email",
+              recipient: session.customer_email ?? null,
+              subject: `Order update: ${session.id}`,
+              payload: {
+                orderId,
+                sessionId: session.id,
+                customerEmail: session.customer_email ?? null,
+                totalCents,
+                reason: "inventory_race",
+              },
+              status: "pending",
+            },
+            {
+              kind: "admin_order_cancelled",
+              channel: "admin",
+              recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
+              subject: `Order cancelled after payment: ${session.id}`,
+              payload: {
+                orderId,
+                sessionId: session.id,
+                customerEmail: session.customer_email ?? null,
+                totalCents,
+              },
+              status: "pending",
+            },
+          ])
         })
       } catch (insertErr) {
         if (isUniqueConstraintViolation(insertErr)) {
@@ -261,6 +437,8 @@ export async function POST(request: Request) {
   for (const slug of productSlugs) {
     revalidatePath(`/product/${slug}`)
   }
+
+  await processPendingNotifications()
 
   return NextResponse.json({ received: true })
 }

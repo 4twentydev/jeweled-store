@@ -4,10 +4,16 @@ import { getDb } from "@/db"
 import { getStripe } from "@/lib/stripe"
 import { getEnv } from "@/lib/env"
 import { SHIPPING_CENTS, formatShippingLabel } from "@/lib/checkout"
-import { checkRateLimit, getClientIp, isAllowedOrigin } from "@/lib/request-guards"
-import { products } from "@/db/schema"
-import { and, eq, inArray } from "drizzle-orm"
+import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
+import { checkoutAttempts, productReservations, products } from "@/db/schema"
+import { and, eq, gte, inArray, sql } from "drizzle-orm"
 import crypto from "crypto"
+import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import {
+  cleanupExpiredReservations,
+  createReservationToken,
+  getReservationExpiry,
+} from "@/lib/reservations"
 
 const CHECKOUT_LIMIT = 10
 const CHECKOUT_WINDOW_MS = 15 * 60 * 1000
@@ -19,13 +25,7 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request)
-  if (
-    !checkRateLimit({
-      key: `checkout:${ip}`,
-      limit: CHECKOUT_LIMIT,
-      windowMs: CHECKOUT_WINDOW_MS,
-    })
-  ) {
+  if (await isRateLimited(checkoutAttempts, ip, CHECKOUT_LIMIT, CHECKOUT_WINDOW_MS)) {
     return NextResponse.json(
       { error: "Too many checkout attempts. Please try again later." },
       { status: 429 }
@@ -45,6 +45,9 @@ export async function POST(request: Request) {
   }
 
   const { email, items } = parsed.data
+  await recordAttempt(checkoutAttempts, ip, CHECKOUT_WINDOW_MS)
+  await cleanupExpiredReservations()
+
   const aggregatedItems = Array.from(
     items
       .reduce((map, item) => {
@@ -79,53 +82,120 @@ export async function POST(request: Request) {
     }
   }
 
-  const lineItems = aggregatedItems.map((item) => {
-    const product = productMap.get(item.productId)!
-    return {
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: product.name,
-          ...(product.images.length > 0 ? { images: [product.images[0]] } : {}),
-        },
-        unit_amount: product.priceCents,
-      },
-      quantity: item.quantity,
-    }
-  })
-
+  const reservationToken = createReservationToken()
   const lookupToken = crypto.randomBytes(32).toString("base64url")
-  const session = await getStripe().checkout.sessions.create({
-    payment_method_types: ["card"],
-    mode: "payment",
-    customer_email: email,
-    line_items: lineItems,
-    success_url: `${env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}&lookup_token=${lookupToken}`,
-    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/cart`,
-    metadata: {
-      lookupToken,
-      items: JSON.stringify(
-        aggregatedItems.map((item) => {
-          const product = productMap.get(item.productId)!
-          return {
-            productId: item.productId,
-            quantity: item.quantity,
-            priceCents: product.priceCents,
-          }
-        })
-      ),
-    },
-    shipping_address_collection: { allowed_countries: ["US", "CA"] },
-    shipping_options: [
-      {
-        shipping_rate_data: {
-          type: "fixed_amount",
-          fixed_amount: { amount: SHIPPING_CENTS, currency: "usd" },
-          display_name: formatShippingLabel(),
-        },
-      },
-    ],
-  })
+  const reservationExpiry = getReservationExpiry()
 
-  return NextResponse.json({ url: session.url })
+  try {
+    await db.transaction(async (tx) => {
+      for (const item of aggregatedItems) {
+        const decremented = await tx
+          .update(products)
+          .set({ stock: sql`${products.stock} - ${item.quantity}` })
+          .where(and(eq(products.id, item.productId), gte(products.stock, item.quantity)))
+          .returning({ id: products.id })
+
+        if (decremented.length === 0) {
+          throw new Error("Inventory changed before checkout could begin")
+        }
+      }
+
+      await tx.insert(productReservations).values(
+        aggregatedItems.map((item) => ({
+          reservationToken,
+          productId: item.productId,
+          quantity: item.quantity,
+          customerEmail: email,
+          expiresAt: reservationExpiry,
+        }))
+      )
+    })
+
+    const lineItems = aggregatedItems.map((item) => {
+      const product = productMap.get(item.productId)!
+      return {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: product.name,
+            ...(product.images.length > 0 ? { images: [product.images[0]] } : {}),
+          },
+          unit_amount: product.priceCents,
+        },
+        quantity: item.quantity,
+      }
+    })
+
+    const session = await getStripe().checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer_email: email,
+      client_reference_id: reservationToken,
+      line_items: lineItems,
+      success_url: `${env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}&lookup_token=${lookupToken}`,
+      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/cart`,
+      expires_at: Math.floor(reservationExpiry.getTime() / 1000),
+      metadata: {
+        lookupToken,
+        reservationToken,
+        items: JSON.stringify(
+          aggregatedItems.map((item) => {
+            const product = productMap.get(item.productId)!
+            return {
+              productId: item.productId,
+              quantity: item.quantity,
+              priceCents: product.priceCents,
+            }
+          })
+        ),
+      },
+      shipping_address_collection: { allowed_countries: ["US", "CA"] },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: SHIPPING_CENTS, currency: "usd" },
+            display_name: formatShippingLabel(),
+          },
+        },
+      ],
+    })
+
+    await db
+      .update(productReservations)
+      .set({ stripeCheckoutSessionId: session.id })
+      .where(eq(productReservations.reservationToken, reservationToken))
+
+    return NextResponse.json({ url: session.url })
+  } catch (error) {
+    await db.transaction(async (tx) => {
+      const heldReservations = await tx
+        .select({
+          id: productReservations.id,
+          productId: productReservations.productId,
+          quantity: productReservations.quantity,
+        })
+        .from(productReservations)
+        .where(eq(productReservations.reservationToken, reservationToken))
+
+      if (heldReservations.length === 0) return
+
+      for (const reservation of heldReservations) {
+        await tx
+          .update(products)
+          .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
+          .where(eq(products.id, reservation.productId))
+      }
+
+      await tx
+        .delete(productReservations)
+        .where(eq(productReservations.reservationToken, reservationToken))
+    })
+
+    const message =
+      error instanceof Error && error.message.includes("Inventory changed")
+        ? "Inventory changed while starting checkout. Please review your cart and try again."
+        : "Unable to start checkout right now. Please try again."
+    return NextResponse.json({ error: message }, { status: 409 })
+  }
 }

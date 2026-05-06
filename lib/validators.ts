@@ -3,6 +3,18 @@ import { z } from "zod"
 export const MAX_CHECKOUT_LINE_ITEMS = 25
 export const MAX_CHECKOUT_QUANTITY = 10
 export const MAX_CART_STORAGE_ITEMS = 50
+export const MAX_CUSTOM_REFERENCE_IMAGES = 5
+
+export const PRODUCT_CATEGORY_VALUES = [
+  "bejeweled-lighters",
+  "lighter-cases",
+  "small-cases",
+  "lip-balms",
+  "lotions",
+  "custom-rhinestone-items",
+] as const
+
+export const productCategorySchema = z.enum(PRODUCT_CATEGORY_VALUES)
 
 export const PRODUCT_CATEGORIES = [
   { value: "bejeweled-lighters", label: "Bejeweled Lighters" },
@@ -13,7 +25,7 @@ export const PRODUCT_CATEGORIES = [
   { value: "custom-rhinestone-items", label: "Custom Rhinestone Items" },
 ] as const
 
-const productImageUrlSchema = z.url().refine(
+const blobImageUrlSchema = z.url().refine(
   (value) => {
     const url = new URL(value)
     return (
@@ -24,6 +36,8 @@ const productImageUrlSchema = z.url().refine(
   "Images must be uploaded through the admin image uploader"
 )
 
+const productImageUrlSchema = blobImageUrlSchema
+
 export const productFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z
@@ -31,7 +45,7 @@ export const productFormSchema = z.object({
     .min(1, "Slug is required")
     .regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
   description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
+  category: productCategorySchema,
   priceInDollars: z.number().positive("Price must be positive"),
   stock: z.int().min(0, "Stock cannot be negative"),
   featured: z.boolean(),
@@ -60,7 +74,7 @@ export const customRequestSchema = z.object({
   customerEmail: z.email(),
   customerName: z.string().min(2).max(100),
   itemDescription: z.string().min(20).max(2000),
-  referenceImages: z.array(z.string().url()).max(5).default([]),
+  referenceImages: z.array(blobImageUrlSchema).max(MAX_CUSTOM_REFERENCE_IMAGES).default([]),
   budgetRange: z.enum(["under-200", "200-500", "500-1000", "1000-2500", "2500-plus"]),
 })
 
@@ -75,6 +89,7 @@ export const customRequestAdminSchema = z.object({
 export type CustomRequestAdminInput = z.infer<typeof customRequestAdminSchema>
 
 export const adminLoginSchema = z.object({
+  email: z.email(),
   password: z.string().min(1),
 })
 

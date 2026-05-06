@@ -36,10 +36,11 @@ async function verifyValue(value: string, sig: string): Promise<boolean> {
   return crypto.subtle.verify("HMAC", key, sigBytes, new TextEncoder().encode(value))
 }
 
-// Token format: `admin:{issuedAt}.{hmac}` — no dots in the payload so indexOf(".") is unambiguous
-export async function createSessionToken(): Promise<string> {
+// Token format: `admin:{issuedAt}:{email}.{hmac}` — no dots in the payload so indexOf(".") is unambiguous
+export async function createSessionToken(email: string): Promise<string> {
   const issuedAt = Math.floor(Date.now() / 1000)
-  const value = `admin:${issuedAt}`
+  const normalizedEmail = email.trim().toLowerCase()
+  const value = `admin:${issuedAt}:${normalizedEmail}`
   const sig = await signValue(value)
   return `${value}.${sig}`
 }
@@ -50,11 +51,13 @@ export async function verifySessionToken(token: string): Promise<boolean> {
   const value = token.slice(0, dot)
   const sig = token.slice(dot + 1)
 
-  if (!value.startsWith("admin:")) return false
-  const issuedAt = parseInt(value.slice("admin:".length), 10)
+  const [prefix, issuedAtValue, email] = value.split(":")
+  if (prefix !== "admin" || !email) return false
+  const issuedAt = parseInt(issuedAtValue ?? "", 10)
   if (isNaN(issuedAt)) return false
   const now = Math.floor(Date.now() / 1000)
   if (now - issuedAt > COOKIE_MAX_AGE) return false
+  if (email !== getEnv().ADMIN_EMAIL.trim().toLowerCase()) return false
 
   return verifyValue(value, sig)
 }
@@ -66,8 +69,8 @@ export async function isAdmin(): Promise<boolean> {
   return verifySessionToken(token)
 }
 
-export async function setAdminCookie(): Promise<void> {
-  const token = await createSessionToken()
+export async function setAdminCookie(email: string): Promise<void> {
+  const token = await createSessionToken(email)
   const cookieStore = await cookies()
   cookieStore.set(ADMIN_COOKIE, token, {
     httpOnly: true,
@@ -75,6 +78,7 @@ export async function setAdminCookie(): Promise<void> {
     sameSite: "lax",
     maxAge: COOKIE_MAX_AGE,
     path: "/",
+    priority: "high",
   })
 }
 

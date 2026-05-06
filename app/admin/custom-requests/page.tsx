@@ -16,17 +16,37 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: "text-red-400",
 }
 
-export default async function AdminCustomRequestsPage() {
+export default async function AdminCustomRequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>
+}) {
   if (!(await isAdmin())) redirect("/admin/login")
-
-  const requests = await getAllCustomRequests()
+  const resolvedSearchParams = await searchParams
+  const query = resolvedSearchParams.q?.trim() || undefined
+  const page = Number(resolvedSearchParams.page ?? "1") || 1
+  const requests = await getAllCustomRequests({ query, page })
 
   return (
     <AdminShell>
       <div className="max-w-5xl">
-        <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-8">
-          Custom Requests ({requests.length})
-        </p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+            Custom Requests
+          </p>
+          <form className="flex gap-2">
+            <input
+              type="search"
+              name="q"
+              defaultValue={query}
+              placeholder="Search customer or description"
+              className="border border-border bg-background px-3 py-2 text-sm"
+            />
+            <button type="submit" className="border border-border px-3 py-2 text-[10px] uppercase">
+              Search
+            </button>
+          </form>
+        </div>
 
         {requests.length === 0 ? (
           <div className="border border-border/30 py-16 text-center">
@@ -100,6 +120,16 @@ export default async function AdminCustomRequestsPage() {
             </table>
           </div>
         )}
+
+        <div className="mt-6 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <Link href={page > 1 ? `/admin/custom-requests?page=${page - 1}${query ? `&q=${encodeURIComponent(query)}` : ""}` : "#"}>
+            Previous
+          </Link>
+          <span>Page {page}</span>
+          <Link href={`/admin/custom-requests?page=${page + 1}${query ? `&q=${encodeURIComponent(query)}` : ""}`}>
+            Next
+          </Link>
+        </div>
       </div>
     </AdminShell>
   )

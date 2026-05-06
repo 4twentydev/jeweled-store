@@ -25,7 +25,10 @@ export default async function SuccessPage({
     )
   }
 
-  const initialOrder = await lookupOrderBySession(session_id, lookup_token)
+  const canLookup = typeof lookup_token === "string" && lookup_token.length > 0
+  const initialOrder = canLookup
+    ? await lookupOrderBySession(session_id, lookup_token)
+    : null
 
   return (
     <Suspense
@@ -36,6 +39,7 @@ export default async function SuccessPage({
       }
     >
       <SuccessClient
+        canLookup={canLookup}
         lookupToken={lookup_token}
         sessionId={session_id}
         initialOrder={initialOrder}

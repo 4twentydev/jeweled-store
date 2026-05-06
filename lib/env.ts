@@ -6,8 +6,11 @@ const envSchema = z.object({
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url(),
+  ADMIN_EMAIL: z.email(),
   ADMIN_PASSWORD: z.string().min(1),
   ADMIN_SECRET: z.string().min(32),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  ADMIN_NOTIFICATION_EMAIL: z.email().optional(),
 })
 
 type Env = z.infer<typeof envSchema>
@@ -21,8 +24,11 @@ export function getEnv(): Env {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
     ADMIN_SECRET: process.env.ADMIN_SECRET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL,
   })
   return _env
 }

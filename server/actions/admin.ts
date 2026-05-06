@@ -13,6 +13,7 @@ import {
   type ProductFormInput,
 } from "@/lib/validators"
 import type { CustomRequestStatus, OrderStatus } from "@/db/schema"
+import { processPendingNotifications, queueNotification } from "@/lib/notifications"
 
 type ActionResult = { error: string } | undefined
 
@@ -146,6 +147,13 @@ export async function updateCustomRequest(
   if (!parsed.success) return { error: "Invalid input" }
 
   const { status, quotedPriceInDollars, stripePaymentLinkId } = parsed.data
+  const [currentRequest] = await getDb()
+    .select({
+      customerEmail: customRequests.customerEmail,
+      customerName: customRequests.customerName,
+    })
+    .from(customRequests)
+    .where(eq(customRequests.id, id))
 
   await getDb()
     .update(customRequests)
@@ -158,6 +166,26 @@ export async function updateCustomRequest(
       stripePaymentLinkId: stripePaymentLinkId || null,
     })
     .where(eq(customRequests.id, id))
+
+  if (
+    currentRequest &&
+    status === "quoted" &&
+    typeof quotedPriceInDollars === "number" &&
+    stripePaymentLinkId?.trim()
+  ) {
+    await queueNotification({
+      kind: "customer_quote_ready",
+      channel: "email",
+      recipient: currentRequest.customerEmail,
+      subject: `Your JWLD custom quote is ready`,
+      payload: {
+        customerName: currentRequest.customerName,
+        quotedPrice: `$${quotedPriceInDollars.toFixed(2)}`,
+        paymentLink: stripePaymentLinkId.trim(),
+      },
+    })
+    await processPendingNotifications()
+  }
 
   revalidatePath("/admin")
   revalidatePath("/admin/custom-requests")

@@ -14,6 +14,14 @@ export default function AdminLoginPage() {
           <p className="text-sm text-destructive">{state.error}</p>
         )}
         <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+          autoComplete="email"
+          className="border border-border bg-background text-foreground px-3 py-2 text-sm rounded-none outline-none focus:ring-1 focus:ring-ring"
+        />
+        <input
           type="password"
           name="password"
           placeholder="Password"

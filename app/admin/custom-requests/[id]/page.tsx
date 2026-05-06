@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { AdminShell } from "@/components/admin/shell"
 import { CustomRequestForm } from "@/components/admin/custom-request-form"
 import { getCustomRequestById } from "@/db/queries/admin"
@@ -110,7 +111,10 @@ export default async function AdminCustomRequestDetailPage({
                   rel="noreferrer"
                   className="border border-border p-3 text-[11px] text-muted-foreground hover:text-foreground break-all transition-colors"
                 >
-                  {url}
+                  <div className="relative mb-3 aspect-square overflow-hidden">
+                    <Image src={url} alt="" fill className="object-cover" />
+                  </div>
+                  View full image
                 </a>
               ))}
             </div>

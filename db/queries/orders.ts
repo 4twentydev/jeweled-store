@@ -1,6 +1,6 @@
 import { getDb } from "@/db"
 import { orders, orderItems } from "@/db/schema"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 
 export async function getOrders() {
   return getDb().select().from(orders).orderBy(orders.createdAt)
@@ -11,6 +11,22 @@ export async function getOrderByStripeSession(stripeCheckoutSessionId: string) {
     .select()
     .from(orders)
     .where(eq(orders.stripeCheckoutSessionId, stripeCheckoutSessionId))
+  return order ?? null
+}
+
+export async function getOrderBySessionAndLookupToken(
+  stripeCheckoutSessionId: string,
+  lookupToken: string
+) {
+  const [order] = await getDb()
+    .select()
+    .from(orders)
+    .where(
+      and(
+        eq(orders.stripeCheckoutSessionId, stripeCheckoutSessionId),
+        eq(orders.lookupToken, lookupToken)
+      )
+    )
   return order ?? null
 }
 
