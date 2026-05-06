@@ -2,7 +2,10 @@ import Link from "next/link"
 import { FadeUp } from "@/components/fade-up"
 import { ProductCard } from "@/components/product-card"
 import { getProducts, getProductsByCategory } from "@/db/queries/products"
+import { PRODUCT_CATEGORY_VALUES } from "@/lib/validators"
 import { cn } from "@/lib/utils"
+
+type ProductCategory = (typeof PRODUCT_CATEGORY_VALUES)[number]
 
 const CATEGORIES = [
   { slug: "bejeweled-lighters", label: "Lighters" },
@@ -13,13 +16,20 @@ const CATEGORIES = [
   { slug: "custom-rhinestone-items", label: "Custom" },
 ]
 
+const CATEGORY_VALUE_SET = new Set<string>(PRODUCT_CATEGORY_VALUES)
+
+function parseProductCategory(value: string | string[] | undefined): ProductCategory | undefined {
+  if (typeof value !== "string") return undefined
+  return CATEGORY_VALUE_SET.has(value) ? (value as ProductCategory) : undefined
+}
+
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { category } = await searchParams
-  const activeCategory = typeof category === "string" ? category : undefined
+  const activeCategory = parseProductCategory(category)
 
   const products = activeCategory
     ? await getProductsByCategory(activeCategory)

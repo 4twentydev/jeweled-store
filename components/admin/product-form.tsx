@@ -16,7 +16,7 @@ type ProductData = {
   name: string
   slug: string
   description: string
-  category: string
+  category: ProductFormInput["category"]
   priceCents: number
   stock: number
   featured: boolean
@@ -49,7 +49,7 @@ export function ProductForm({ product }: { product?: ProductData }) {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<ProductFormInput>({
+  } = useForm<ProductFormInput, unknown, ProductFormInput>({
     resolver: zodResolver(productFormSchema),
     defaultValues: product
       ? {
@@ -67,7 +67,6 @@ export function ProductForm({ product }: { product?: ProductData }) {
           name: "",
           slug: "",
           description: "",
-          category: "",
           priceInDollars: 0,
           stock: 0,
           featured: false,

@@ -3,6 +3,7 @@ import { sql as drizzleSql } from "drizzle-orm"
 import { neon } from "@neondatabase/serverless"
 import { drizzle } from "drizzle-orm/neon-http"
 import * as schema from "../db/schema"
+import type { ProductCategory as DbProductCategory } from "../db/schema"
 import productCatalog from "../data/products/metadata/jwld_product_catalog.json"
 
 config({ path: ".env.local", quiet: true })
@@ -21,7 +22,7 @@ type SeedCatalogProduct = CatalogProduct & {
   featured?: boolean
 }
 
-const CATEGORY_MAP: Record<ProductCategory, string> = {
+const CATEGORY_MAP: Record<ProductCategory, DbProductCategory> = {
   Lighter: "bejeweled-lighters",
   Container: "small-cases",
 }
