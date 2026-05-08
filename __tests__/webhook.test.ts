@@ -80,7 +80,10 @@ function makeSession(overrides: Record<string, unknown> = {}) {
     },
     amount_total: ORDER_ITEM.priceCents * ORDER_ITEM.quantity,
     amount_subtotal: ORDER_ITEM.priceCents * ORDER_ITEM.quantity,
-    metadata: { items: JSON.stringify([ORDER_ITEM]) },
+    metadata: {
+      items: JSON.stringify([ORDER_ITEM]),
+      reservationToken: "reservation-token",
+    },
     ...overrides,
   }
 }
@@ -101,17 +104,20 @@ function makeRequest(body = "raw-body", signature = "stripe-sig") {
 // (orders table), second is the active reservations lookup, third is the products fetch.
 function setupSelects(existingOrder: boolean, productList: unknown[], reservations: unknown[] = []) {
   let calls = 0
-  mocks.selectWhere.mockImplementation(() =>
-    Promise.resolve(
-      calls++ === 0
+  mocks.selectWhere.mockImplementation(async () => {
+    const result =
+      calls === 0
         ? existingOrder
           ? [{ id: "existing-id" }]
           : []
-        : calls === 2
+        : calls === 1
           ? reservations
-          : productList
-    )
-  )
+          : calls === 2
+            ? productList
+            : []
+    calls += 1
+    return result
+  })
 }
 
 // ---

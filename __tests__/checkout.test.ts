@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   reservationUpdateWhere: vi.fn(),
   reservationUpdateSet: vi.fn(),
   dbUpdateWhere: vi.fn(),
+  decrementReturning: vi.fn(),
 }))
 
 vi.mock("@/db", () => ({
@@ -70,10 +71,14 @@ function makeRequest(body: unknown) {
 describe("POST /api/checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.sessionCreate.mockResolvedValue({ url: "https://stripe.com/checkout/test" })
+    mocks.sessionCreate.mockResolvedValue({
+      id: "cs_test_123",
+      url: "https://stripe.com/checkout/test",
+    })
     mocks.insertValues.mockResolvedValue([])
     mocks.insert.mockReturnValue({ values: mocks.insertValues })
-    mocks.updateWhere.mockResolvedValue([{ id: UUID1 }])
+    mocks.decrementReturning.mockResolvedValue([{ id: UUID1 }])
+    mocks.updateWhere.mockReturnValue({ returning: mocks.decrementReturning })
     mocks.updateSet.mockReturnValue({ where: mocks.updateWhere })
     mocks.reservationUpdateSet.mockReturnValue({ where: mocks.dbUpdateWhere })
     mocks.dbUpdateWhere.mockResolvedValue([])
