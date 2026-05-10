@@ -36,6 +36,7 @@ vi.mock("@/lib/stripe", () => ({
 
 vi.mock("@/lib/env", () => ({
   getEnv: () => ({ NEXT_PUBLIC_APP_URL: "https://example.com" }),
+  getCheckoutEnv: () => ({ NEXT_PUBLIC_APP_URL: "https://example.com", STRIPE_SECRET_KEY: "sk_test" }),
 }))
 
 vi.mock("@/lib/db-rate-limit", () => ({

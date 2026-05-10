@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { checkoutSchema } from "@/lib/validators"
 import { getDb } from "@/db"
 import { getStripe } from "@/lib/stripe"
-import { getEnv } from "@/lib/env"
+import { getCheckoutEnv } from "@/lib/env"
 import { SHIPPING_CENTS, formatShippingLabel } from "@/lib/checkout"
 import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 import { checkoutAttempts, productReservations, products } from "@/db/schema"
@@ -19,7 +19,17 @@ const CHECKOUT_LIMIT = 10
 const CHECKOUT_WINDOW_MS = 15 * 60 * 1000
 
 export async function POST(request: Request) {
-  const env = getEnv()
+  let env: ReturnType<typeof getCheckoutEnv>
+  try {
+    env = getCheckoutEnv()
+  } catch (error) {
+    console.error("[checkout] missing payment configuration:", error)
+    return NextResponse.json(
+      { error: "Checkout is not configured. Please contact support." },
+      { status: 503 }
+    )
+  }
+
   if (!isAllowedOrigin(request, env.NEXT_PUBLIC_APP_URL)) {
     return NextResponse.json({ error: "Invalid request origin" }, { status: 403 })
   }
