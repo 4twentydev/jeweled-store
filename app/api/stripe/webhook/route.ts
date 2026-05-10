@@ -9,7 +9,6 @@ import { randomUUID } from "crypto"
 import { z } from "zod"
 import type Stripe from "stripe"
 import { processPendingNotifications } from "@/lib/notifications"
-import { cleanupExpiredReservations } from "@/lib/reservations"
 
 function isUniqueConstraintViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && "code" in err && (err as { code: unknown }).code === "23505"
@@ -78,7 +77,6 @@ async function releaseReservationsBySession(sessionId: string) {
 }
 
 export async function POST(request: Request) {
-  await cleanupExpiredReservations()
   const body = await request.text()
   const signature = request.headers.get("stripe-signature")
 

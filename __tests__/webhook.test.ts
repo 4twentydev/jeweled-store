@@ -59,6 +59,7 @@ vi.mock("@/lib/notifications", () => ({
 }))
 
 import { POST } from "@/app/api/stripe/webhook/route"
+import { cleanupExpiredReservations } from "@/lib/reservations"
 
 // --- Helpers ---
 
@@ -245,6 +246,29 @@ describe("POST /api/stripe/webhook", () => {
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
       expect(mocks.transaction).toHaveBeenCalledOnce()
+      expect(mocks.insertValues).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "new" })
+      )
+    })
+
+    it("does not broadly clean expired reservations before fulfilling a paid session", async () => {
+      mocks.constructEvent.mockReturnValue(makeEvent())
+      setupSelects(false, [
+        { id: UUID1, slug: "test", active: true, stock: 10 },
+      ], [
+        {
+          id: "reservation-id",
+          productId: UUID1,
+          quantity: ORDER_ITEM.quantity,
+          stripeCheckoutSessionId: SESSION_ID,
+        },
+      ])
+
+      const res = await POST(makeRequest())
+
+      expect(res.status).toBe(200)
+      expect(cleanupExpiredReservations).not.toHaveBeenCalled()
+      expect(mocks.decrementReturning).not.toHaveBeenCalled()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "new" })
       )
