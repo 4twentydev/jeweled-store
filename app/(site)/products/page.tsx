@@ -5,6 +5,8 @@ import { getProducts, getProductsByCategory } from "@/db/queries/products"
 import { PRODUCT_CATEGORY_VALUES } from "@/lib/validators"
 import { cn } from "@/lib/utils"
 
+export const dynamic = "force-dynamic"
+
 type ProductCategory = (typeof PRODUCT_CATEGORY_VALUES)[number]
 
 const CATEGORIES = [

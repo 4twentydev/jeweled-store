@@ -7,6 +7,8 @@ import { ProductCard } from "@/components/product-card"
 import { ProductDetailAccordions } from "@/components/product-detail-accordions"
 import { ProductGallery } from "@/components/product-gallery"
 
+export const dynamic = "force-dynamic"
+
 const GRADIENT_MAP: Record<string, string> = {
   "bejeweled-lighters":
     "radial-gradient(ellipse 55% 65% at 50% 35%, rgba(212,175,55,0.13) 0%, transparent 70%), #0e0e0e",

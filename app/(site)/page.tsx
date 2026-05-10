@@ -4,6 +4,8 @@ import { FeaturedProducts } from "@/components/sections/featured-products"
 import { CategoryStrip } from "@/components/sections/category-strip"
 import { CustomOrderCta } from "@/components/sections/custom-order-cta"
 
+export const dynamic = "force-dynamic"
+
 export default function HomePage() {
   return (
     <>
