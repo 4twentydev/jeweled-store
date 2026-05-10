@@ -14,16 +14,23 @@ const db = drizzle(sql, { schema })
 
 type CatalogProduct = (typeof productCatalog)[number]
 
-type ProductCategory = "Lighter" | "Container"
+type ProductCategory = "Lighter" | "LighterCase" | "Container"
 type SeedCatalogProduct = CatalogProduct & {
   category: ProductCategory
   priceCents?: number
   stock?: number
   featured?: boolean
+  images?: {
+    webp?: string
+    png?: string
+    thumbnail?: string
+    gallery?: string[]
+  }
 }
 
 const CATEGORY_MAP: Record<ProductCategory, DbProductCategory> = {
   Lighter: "bejeweled-lighters",
+  LighterCase: "lighter-cases",
   Container: "small-cases",
 }
 
@@ -31,6 +38,11 @@ const FEATURED_SKUS = new Set(["JWLD-001", "JWLD-002", "JWLD-015", "JWLD-018"])
 
 function priceForProduct(product: SeedCatalogProduct) {
   return product.priceCents ?? (product.category === "Container" ? 1800 : 2800)
+}
+
+function imagesForProduct(product: SeedCatalogProduct) {
+  const images = product.images?.gallery ?? [product.images?.webp].filter(Boolean)
+  return images.filter((image): image is string => image?.startsWith("/") ?? false)
 }
 
 async function seed() {
@@ -47,7 +59,7 @@ async function seed() {
     description: product.description,
     category: CATEGORY_MAP[product.category],
     priceCents: priceForProduct(product),
-    images: [],
+    images: imagesForProduct(product),
     stock: product.stock ?? 1,
     featured: product.featured ?? FEATURED_SKUS.has(product.sku),
     active: true,
@@ -63,6 +75,7 @@ async function seed() {
         description: drizzleSql`excluded.description`,
         category: drizzleSql`excluded.category`,
         priceCents: drizzleSql`excluded.price_cents`,
+        images: drizzleSql`case when jsonb_array_length(excluded.images) > 0 then excluded.images else ${schema.products.images} end`,
         stock: drizzleSql`excluded.stock`,
         featured: drizzleSql`excluded.featured`,
         active: drizzleSql`excluded.active`,

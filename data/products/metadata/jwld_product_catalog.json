@@ -1384,5 +1384,54 @@
     "seoDescription": "Shop the Violet Rose Noir Container, a purple crystal compact with a dramatic black rose trio centerpiece.",
     "care": "Handle gently. Avoid dropping, scraping, soaking, or picking at the beadwork/rhinestones. Wipe with a soft dry cloth.",
     "altText": "Violet crystal round container with a black rose trio centerpiece."
+  },
+  {
+    "sku": "JWLD-LC-401",
+    "name": "Black Pearl Rhinestone Lighter Case",
+    "slug": "black-pearl-rhinestone-lighter-case",
+    "category": "LighterCase",
+    "collection": "Lighter Cases",
+    "color": "black, pearl white",
+    "images": {
+      "webp": "/products/jwld-black-pearl-lighter-case-hero.webp",
+      "gallery": [
+        "/products/jwld-black-pearl-lighter-case-hero.webp",
+        "/products/jwld-black-pearl-lighter-case-dark-luxury.webp",
+        "/products/jwld-black-pearl-lighter-case-rhinestone-detail.webp",
+        "/products/jwld-black-pearl-lighter-case-lifestyle.webp"
+      ]
+    },
+    "shortDescription": "A black rhinestone lighter case wrapped in pearl-white wave detailing for a clean, high-contrast sparkle.",
+    "description": "The Black Pearl Rhinestone Lighter Case gives a standard pocket lighter a polished JWLD upgrade. Glossy black stones create the base while pearl-white rhinestones flow in a wavy pattern around the case, giving it a bold but wearable contrast. It is small, eye-catching, and made for daily carry, display trays, gift bundles, or custom 420-friendly accessory drops.",
+    "features": [
+      "Hand-decorated rhinestone lighter sleeve",
+      "Black base with pearl-white wave pattern",
+      "Fits standard full-size disposable lighter shape",
+      "Reusable case design; lighter can be swapped out",
+      "Great for gifts, display sets, and custom bundles"
+    ],
+    "details": {
+      "mainColor": "black",
+      "accentColors": [
+        "pearl white"
+      ],
+      "finish": "rhinestones, reusable lighter sleeve",
+      "style": "black pearl / high contrast / wave pattern"
+    },
+    "tags": [
+      "lighter case",
+      "rhinestone",
+      "black",
+      "pearl",
+      "bling",
+      "JWLD"
+    ],
+    "priceCents": 2200,
+    "stock": 1,
+    "featured": true,
+    "seoTitle": "Black Pearl Rhinestone Lighter Case | JWLD.store",
+    "seoDescription": "Shop a black and pearl-white rhinestone lighter case from JWLD.store. A reusable bling lighter sleeve with bold wave detailing.",
+    "care": "Keep dry when possible. Wipe gently with a soft cloth. Do not soak, scrape, or store loose with sharp items.",
+    "altText": "Black lighter case covered in black and pearl-white rhinestones in a wave pattern."
   }
 ]
