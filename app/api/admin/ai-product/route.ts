@@ -4,19 +4,22 @@ import crypto from "crypto"
 import sharp from "sharp"
 import { isAdmin } from "@/lib/auth"
 import { PRODUCT_CATEGORIES, productFormSchema } from "@/lib/validators"
+import {
+  IMAGE_MIME_TYPES,
+  ImageUploadError,
+  normalizeImageUpload,
+} from "@/lib/image-upload"
 
 export const maxDuration = 60
 
 const OPENAI_API_URL = "https://api.openai.com/v1"
 const MAX_FILES = 4
-const MAX_FILE_BYTES = 10 * 1024 * 1024
 const MAX_REFERENCE_DIMENSION = 1536
-
-const ALLOWED_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/avif",
+const AI_REFERENCE_MIME_TYPES = new Set([
+  IMAGE_MIME_TYPES.jpeg,
+  IMAGE_MIME_TYPES.png,
+  IMAGE_MIME_TYPES.webp,
+  IMAGE_MIME_TYPES.avif,
 ])
 
 type DraftProduct = {
@@ -50,26 +53,12 @@ function getOpenAIHeaders(contentType = "application/json") {
 }
 
 async function prepareReference(file: File): Promise<PreparedReference> {
-  if (file.size > MAX_FILE_BYTES) {
-    throw new Error("Each image must be 10 MB or smaller")
-  }
-
-  const mimeType = file.type.toLowerCase().split(";")[0].trim()
-  if (!ALLOWED_MIME_TYPES.has(mimeType)) {
-    throw new Error("Upload JPG, PNG, WebP, or AVIF product photos")
-  }
-
-  const input = Buffer.from(await file.arrayBuffer())
-  const webp = await sharp(input, { animated: false })
-    .rotate()
-    .resize({
-      width: MAX_REFERENCE_DIMENSION,
-      height: MAX_REFERENCE_DIMENSION,
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .webp({ quality: 88 })
-    .toBuffer()
+  const webp = await normalizeImageUpload(file, {
+    allowedMimeTypes: AI_REFERENCE_MIME_TYPES,
+    outputDimension: MAX_REFERENCE_DIMENSION,
+    outputQuality: 88,
+    typeErrorMessage: "Upload JPG, PNG, WebP, or AVIF product photos",
+  })
 
   const bytes = new Uint8Array(webp.length)
   bytes.set(webp)
@@ -287,6 +276,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ product: parsed.data })
   } catch (err) {
     console.error("[ai product] failed:", err)
+    if (err instanceof ImageUploadError) {
+      return NextResponse.json({ error: err.message }, { status: err.status })
+    }
     const message = err instanceof Error ? err.message : "AI product generation failed"
     return NextResponse.json({ error: message }, { status: 502 })
   }
