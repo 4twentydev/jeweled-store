@@ -9,7 +9,7 @@ async function verifyToken(token: string): Promise<boolean> {
   if (!secret) return false
 
   // Token format: `admin:{issuedAt}:{email}.{hmac}`
-  const dot = token.indexOf(".")
+  const dot = token.lastIndexOf(".")
   if (dot === -1) return false
   const value = token.slice(0, dot)
   const sig = token.slice(dot + 1)

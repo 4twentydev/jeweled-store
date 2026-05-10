@@ -36,7 +36,7 @@ async function verifyValue(value: string, sig: string): Promise<boolean> {
   return crypto.subtle.verify("HMAC", key, sigBytes, new TextEncoder().encode(value))
 }
 
-// Token format: `admin:{issuedAt}:{email}.{hmac}` — no dots in the payload so indexOf(".") is unambiguous
+// Token format: `admin:{issuedAt}:{email}.{hmac}`
 export async function createSessionToken(email: string): Promise<string> {
   const issuedAt = Math.floor(Date.now() / 1000)
   const normalizedEmail = email.trim().toLowerCase()
@@ -46,7 +46,7 @@ export async function createSessionToken(email: string): Promise<string> {
 }
 
 export async function verifySessionToken(token: string): Promise<boolean> {
-  const dot = token.indexOf(".")
+  const dot = token.lastIndexOf(".")
   if (dot === -1) return false
   const value = token.slice(0, dot)
   const sig = token.slice(dot + 1)
