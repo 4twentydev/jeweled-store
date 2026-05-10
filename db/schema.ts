@@ -132,6 +132,16 @@ export const customRequestAttempts = pgTable(
   (t) => [index("custom_request_attempts_ip_at_idx").on(t.ip, t.attemptedAt)]
 )
 
+export const customRequestUploadAttempts = pgTable(
+  "custom_request_upload_attempts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ip: text("ip").notNull(),
+    attemptedAt: timestamp("attempted_at").defaultNow().notNull(),
+  },
+  (t) => [index("custom_request_upload_attempts_ip_at_idx").on(t.ip, t.attemptedAt)]
+)
+
 export const checkoutAttempts = pgTable(
   "checkout_attempts",
   {

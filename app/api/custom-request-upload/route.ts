@@ -2,6 +2,10 @@ import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
 import sharp from "sharp"
 import crypto from "crypto"
+import { customRequestUploadAttempts } from "@/db/schema"
+import { getEnv } from "@/lib/env"
+import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -15,6 +19,8 @@ const MAX_BYTES = 10 * 1024 * 1024
 const MAX_DIMENSION = 8000
 const OUTPUT_DIMENSION = 1600
 const OUTPUT_QUALITY = 84
+const UPLOAD_LIMIT = 20
+const UPLOAD_WINDOW_MS = 60 * 60 * 1000
 
 function matchesMagicBytes(buf: Uint8Array, mimeType: string): boolean {
   switch (mimeType) {
@@ -52,11 +58,30 @@ function matchesMagicBytes(buf: Uint8Array, mimeType: string): boolean {
 }
 
 export async function POST(req: Request) {
+  if (!isAllowedOrigin(req, getEnv().NEXT_PUBLIC_APP_URL)) {
+    return NextResponse.json({ error: "Invalid request origin" }, { status: 403 })
+  }
+
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: "Image storage is not configured" }, { status: 500 })
   }
 
-  const form = await req.formData()
+  const ip = getClientIp(req)
+  if (await isRateLimited(customRequestUploadAttempts, ip, UPLOAD_LIMIT, UPLOAD_WINDOW_MS)) {
+    return NextResponse.json(
+      { error: "Too many uploads. Please try again later." },
+      { status: 429 }
+    )
+  }
+  await recordAttempt(customRequestUploadAttempts, ip, UPLOAD_WINDOW_MS)
+
+  let form: FormData
+  try {
+    form = await req.formData()
+  } catch {
+    return NextResponse.json({ error: "Invalid upload" }, { status: 400 })
+  }
+
   const file = form.get("file") as File | null
   if (!file || !file.size) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 })
@@ -71,7 +96,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File type not allowed" }, { status: 415 })
   }
 
-  const arrayBuf = await file.arrayBuffer()
+  let arrayBuf: ArrayBuffer
+  try {
+    arrayBuf = await file.arrayBuffer()
+  } catch {
+    return NextResponse.json({ error: "File could not be read" }, { status: 400 })
+  }
+
   const buf = new Uint8Array(arrayBuf)
   if (!matchesMagicBytes(buf, declaredMime)) {
     return NextResponse.json(
@@ -95,22 +126,34 @@ export async function POST(req: Request) {
     )
   }
 
-  const optimized = await sharp(Buffer.from(arrayBuf))
-    .rotate()
-    .resize({
-      width: OUTPUT_DIMENSION,
-      height: OUTPUT_DIMENSION,
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .webp({ quality: OUTPUT_QUALITY })
-    .toBuffer()
+  let optimized: Buffer
+  try {
+    optimized = await sharp(Buffer.from(arrayBuf))
+      .rotate()
+      .resize({
+        width: OUTPUT_DIMENSION,
+        height: OUTPUT_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: OUTPUT_QUALITY })
+      .toBuffer()
+  } catch (err) {
+    console.error("[custom request upload] image optimization failed:", err)
+    return NextResponse.json({ error: "Image optimization failed" }, { status: 422 })
+  }
 
   const filename = `custom-requests/${crypto.randomUUID()}.webp`
-  const blob = await put(filename, optimized, {
-    access: "public",
-    contentType: "image/webp",
-  })
+  let blob: Awaited<ReturnType<typeof put>>
+  try {
+    blob = await put(filename, optimized, {
+      access: "public",
+      contentType: "image/webp",
+    })
+  } catch (err) {
+    console.error("[custom request upload] blob put failed:", err)
+    return NextResponse.json({ error: "Image upload failed" }, { status: 502 })
+  }
 
   return NextResponse.json({ url: blob.url })
 }

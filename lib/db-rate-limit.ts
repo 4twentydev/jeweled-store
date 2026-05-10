@@ -4,9 +4,14 @@ import {
   adminLoginAttempts,
   checkoutAttempts,
   customRequestAttempts,
+  customRequestUploadAttempts,
 } from "@/db/schema"
 
-type AttemptTable = typeof adminLoginAttempts | typeof checkoutAttempts | typeof customRequestAttempts
+type AttemptTable =
+  | typeof adminLoginAttempts
+  | typeof checkoutAttempts
+  | typeof customRequestAttempts
+  | typeof customRequestUploadAttempts
 
 export async function isRateLimited(
   table: AttemptTable,
