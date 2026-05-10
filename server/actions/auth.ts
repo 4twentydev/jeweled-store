@@ -9,6 +9,22 @@ import { clearAttempts, isRateLimited, recordAttempt } from "@/lib/db-rate-limit
 
 type LoginState = { error: string } | undefined
 
+function getClientIp(headersList: Headers): string | null {
+  const candidates = [
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim(),
+    headersList.get("x-real-ip")?.trim(),
+    headersList.get("cf-connecting-ip")?.trim(),
+    headersList.get("x-vercel-forwarded-for")?.split(",")[0]?.trim(),
+  ]
+
+  for (const candidate of candidates) {
+    if (!candidate || candidate.toLowerCase() === "unknown") continue
+    return candidate
+  }
+
+  return null
+}
+
 const MAX_ATTEMPTS = 5
 const WINDOW_MS = 15 * 60 * 1000
 
@@ -34,8 +50,9 @@ async function verifyPasswordConstantTime(submitted: string): Promise<boolean> {
   return diff === 0
 }
 
-async function countRecentFailures(ip: string): Promise<number> {
+async function countRecentFailures(ip: string | null): Promise<number> {
   try {
+    if (!ip) return 0
     return (await isRateLimited(adminLoginAttempts, ip, MAX_ATTEMPTS, WINDOW_MS))
       ? MAX_ATTEMPTS
       : 0
@@ -45,16 +62,18 @@ async function countRecentFailures(ip: string): Promise<number> {
   }
 }
 
-async function recordFailure(ip: string): Promise<void> {
+async function recordFailure(ip: string | null): Promise<void> {
   try {
+    if (!ip) return
     await recordAttempt(adminLoginAttempts, ip, WINDOW_MS)
   } catch {
     // non-fatal — rate limit state is best-effort
   }
 }
 
-async function clearFailures(ip: string): Promise<void> {
+async function clearFailures(ip: string | null): Promise<void> {
   try {
+    if (!ip) return
     await clearAttempts(adminLoginAttempts, ip)
   } catch {
     // non-fatal
@@ -67,10 +86,7 @@ export async function adminLogin(
 ): Promise<LoginState> {
   const { headers } = await import("next/headers")
   const headersList = await headers()
-  const ip =
-    headersList.get("x-forwarded-for")?.split(",")[0].trim() ??
-    headersList.get("x-real-ip") ??
-    "unknown"
+  const ip = getClientIp(headersList)
 
   const failures = await countRecentFailures(ip)
   if (failures >= MAX_ATTEMPTS) {
