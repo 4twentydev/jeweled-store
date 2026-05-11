@@ -34,6 +34,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request origin" }, { status: 403 })
   }
 
+  try {
+    return await createCheckoutSession(request, env)
+  } catch (error) {
+    console.error("[checkout] request failed:", error)
+    return NextResponse.json(
+      { error: "Unable to start checkout right now. Please try again." },
+      { status: 503 }
+    )
+  }
+}
+
+async function createCheckoutSession(
+  request: Request,
+  env: ReturnType<typeof getCheckoutEnv>
+) {
   const ip = getClientIp(request)
   if (await isRateLimited(checkoutAttempts, ip, CHECKOUT_LIMIT, CHECKOUT_WINDOW_MS)) {
     return NextResponse.json(
@@ -178,29 +193,37 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    await db.transaction(async (tx) => {
-      const heldReservations = await tx
-        .select({
-          id: productReservations.id,
-          productId: productReservations.productId,
-          quantity: productReservations.quantity,
-        })
-        .from(productReservations)
-        .where(eq(productReservations.reservationToken, reservationToken))
+    try {
+      await db.transaction(async (tx) => {
+        const heldReservations = await tx
+          .select({
+            id: productReservations.id,
+            productId: productReservations.productId,
+            quantity: productReservations.quantity,
+          })
+          .from(productReservations)
+          .where(eq(productReservations.reservationToken, reservationToken))
 
-      if (heldReservations.length === 0) return
+        if (heldReservations.length === 0) return
 
-      for (const reservation of heldReservations) {
+        for (const reservation of heldReservations) {
+          await tx
+            .update(products)
+            .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
+            .where(eq(products.id, reservation.productId))
+        }
+
         await tx
-          .update(products)
-          .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
-          .where(eq(products.id, reservation.productId))
-      }
-
-      await tx
-        .delete(productReservations)
-        .where(eq(productReservations.reservationToken, reservationToken))
-    })
+          .delete(productReservations)
+          .where(eq(productReservations.reservationToken, reservationToken))
+      })
+    } catch (rollbackError) {
+      console.error("[checkout] reservation rollback failed:", rollbackError)
+      return NextResponse.json(
+        { error: "Unable to start checkout right now. Please contact support." },
+        { status: 503 }
+      )
+    }
 
     const message =
       error instanceof Error && error.message.includes("Inventory changed")

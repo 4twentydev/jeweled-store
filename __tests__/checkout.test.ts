@@ -51,6 +51,8 @@ vi.mock("@/lib/reservations", () => ({
 }))
 
 import { POST } from "@/app/api/checkout/route"
+import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { cleanupExpiredReservations } from "@/lib/reservations"
 
 const fakeProduct = {
   id: UUID1,
@@ -72,6 +74,9 @@ function makeRequest(body: unknown) {
 describe("POST /api/checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(isRateLimited).mockResolvedValue(false)
+    vi.mocked(recordAttempt).mockResolvedValue(undefined)
+    vi.mocked(cleanupExpiredReservations).mockResolvedValue(undefined)
     mocks.sessionCreate.mockResolvedValue({
       id: "cs_test_123",
       url: "https://stripe.com/checkout/test",
@@ -136,6 +141,18 @@ describe("POST /api/checkout", () => {
     const res = await POST(makeRequest({ email: "test@example.com", items: [{ productId: UUID1, quantity: 5 }] }))
     expect(res.status).toBe(400)
     expect((await res.json()).error).toMatch(/Insufficient stock/)
+  })
+
+  it("returns a controlled 503 when checkout setup fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+    mocks.selectWhere.mockRejectedValueOnce(new Error("relation products does not exist"))
+
+    const res = await POST(makeRequest({ email: "test@example.com", items: [{ productId: UUID1, quantity: 1 }] }))
+
+    expect(res.status).toBe(503)
+    expect((await res.json()).error).toBe("Unable to start checkout right now. Please try again.")
+    expect(consoleError).toHaveBeenCalledWith("[checkout] request failed:", expect.any(Error))
+    consoleError.mockRestore()
   })
 
   it("aggregates duplicate productIds before stock check", async () => {
