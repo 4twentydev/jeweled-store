@@ -110,6 +110,7 @@ async function createCheckoutSession(
   const reservationToken = createReservationToken()
   const lookupToken = crypto.randomBytes(32).toString("base64url")
   const reservationExpiry = getReservationExpiry()
+  let reservationCreated = false
 
   try {
     await db.transaction(async (tx) => {
@@ -135,6 +136,7 @@ async function createCheckoutSession(
         }))
       )
     })
+    reservationCreated = true
 
     const lineItems = aggregatedItems.map((item) => {
       const product = productMap.get(item.productId)!
@@ -193,36 +195,40 @@ async function createCheckoutSession(
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    try {
-      await db.transaction(async (tx) => {
-        const heldReservations = await tx
-          .select({
-            id: productReservations.id,
-            productId: productReservations.productId,
-            quantity: productReservations.quantity,
-          })
-          .from(productReservations)
-          .where(eq(productReservations.reservationToken, reservationToken))
+    console.error("[checkout] session creation failed:", error)
 
-        if (heldReservations.length === 0) return
+    if (reservationCreated) {
+      try {
+        await db.transaction(async (tx) => {
+          const heldReservations = await tx
+            .select({
+              id: productReservations.id,
+              productId: productReservations.productId,
+              quantity: productReservations.quantity,
+            })
+            .from(productReservations)
+            .where(eq(productReservations.reservationToken, reservationToken))
 
-        for (const reservation of heldReservations) {
+          if (heldReservations.length === 0) return
+
+          for (const reservation of heldReservations) {
+            await tx
+              .update(products)
+              .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
+              .where(eq(products.id, reservation.productId))
+          }
+
           await tx
-            .update(products)
-            .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
-            .where(eq(products.id, reservation.productId))
-        }
-
-        await tx
-          .delete(productReservations)
-          .where(eq(productReservations.reservationToken, reservationToken))
-      })
-    } catch (rollbackError) {
-      console.error("[checkout] reservation rollback failed:", rollbackError)
-      return NextResponse.json(
-        { error: "Unable to start checkout right now. Please contact support." },
-        { status: 503 }
-      )
+            .delete(productReservations)
+            .where(eq(productReservations.reservationToken, reservationToken))
+        })
+      } catch (rollbackError) {
+        console.error("[checkout] reservation rollback failed:", rollbackError)
+        return NextResponse.json(
+          { error: "Unable to start checkout right now. Please contact support." },
+          { status: 503 }
+        )
+      }
     }
 
     const message =

@@ -155,6 +155,17 @@ describe("POST /api/checkout", () => {
     consoleError.mockRestore()
   })
 
+  it("does not run manual rollback when the reservation transaction fails before commit", async () => {
+    mocks.selectWhere.mockResolvedValue([fakeProduct])
+    mocks.transaction.mockRejectedValueOnce(new Error("relation product_reservations does not exist"))
+
+    const res = await POST(makeRequest({ email: "test@example.com", items: [{ productId: UUID1, quantity: 1 }] }))
+
+    expect(res.status).toBe(409)
+    expect((await res.json()).error).toBe("Unable to start checkout right now. Please try again.")
+    expect(mocks.transaction).toHaveBeenCalledOnce()
+  })
+
   it("aggregates duplicate productIds before stock check", async () => {
     // Two line-items for the same product totaling qty 5; stock is only 4
     mocks.selectWhere.mockResolvedValue([{ ...fakeProduct, stock: 4 }])
