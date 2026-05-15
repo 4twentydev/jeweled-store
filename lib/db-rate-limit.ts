@@ -34,10 +34,8 @@ export async function recordAttempt(
   windowMs: number
 ): Promise<void> {
   const expiry = new Date(Date.now() - windowMs)
-  await getDb().batch([
-    getDb().insert(table).values({ ip }),
-    getDb().delete(table).where(lt(table.attemptedAt, expiry)),
-  ])
+  await getDb().insert(table).values({ ip })
+  await getDb().delete(table).where(lt(table.attemptedAt, expiry))
 }
 
 export async function clearAttempts(table: AttemptTable, ip: string): Promise<void> {
