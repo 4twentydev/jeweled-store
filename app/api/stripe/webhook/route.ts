@@ -44,35 +44,30 @@ const metadataItemsSchema = z
 
 async function releaseReservationsBySession(sessionId: string) {
   const db = getDb()
-  const reservations = await db
-    .select({
-      id: productReservations.id,
-      productId: productReservations.productId,
-      quantity: productReservations.quantity,
-    })
-    .from(productReservations)
-    .where(
-      and(
-        eq(productReservations.stripeCheckoutSessionId, sessionId),
-        isNull(productReservations.fulfilledAt),
-        isNull(productReservations.releasedAt)
-      )
-    )
-
-  if (reservations.length === 0) return
 
   await db.transaction(async (tx) => {
-    for (const reservation of reservations) {
+    const released = await tx
+      .update(productReservations)
+      .set({ releasedAt: new Date() })
+      .where(
+        and(
+          eq(productReservations.stripeCheckoutSessionId, sessionId),
+          isNull(productReservations.fulfilledAt),
+          isNull(productReservations.releasedAt)
+        )
+      )
+      .returning({
+        id: productReservations.id,
+        productId: productReservations.productId,
+        quantity: productReservations.quantity,
+      })
+
+    for (const reservation of released) {
       await tx
         .update(products)
         .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
         .where(eq(products.id, reservation.productId))
     }
-
-    await tx
-      .update(productReservations)
-      .set({ releasedAt: new Date() })
-      .where(inArray(productReservations.id, reservations.map((r) => r.id)))
   })
 }
 

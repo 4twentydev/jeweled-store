@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import { and, eq, inArray, isNull, lte, sql } from "drizzle-orm"
+import { and, eq, isNull, lte, sql } from "drizzle-orm"
 import { getDb } from "@/db"
 import { productReservations, products } from "@/db/schema"
 
@@ -16,34 +16,30 @@ export function getReservationExpiry() {
 export async function cleanupExpiredReservations(): Promise<void> {
   const db = getDb()
   const now = new Date()
-  const expired = await db
-    .select({
-      id: productReservations.id,
-      productId: productReservations.productId,
-      quantity: productReservations.quantity,
-    })
-    .from(productReservations)
-    .where(
-      and(
-        lte(productReservations.expiresAt, now),
-        isNull(productReservations.fulfilledAt),
-        isNull(productReservations.releasedAt)
-      )
-    )
-
-  if (expired.length === 0) return
 
   await db.transaction(async (tx) => {
-    for (const reservation of expired) {
+    const released = await tx
+      .update(productReservations)
+      .set({ releasedAt: now })
+      .where(
+        and(
+          lte(productReservations.expiresAt, now),
+          isNull(productReservations.stripeCheckoutSessionId),
+          isNull(productReservations.fulfilledAt),
+          isNull(productReservations.releasedAt)
+        )
+      )
+      .returning({
+        id: productReservations.id,
+        productId: productReservations.productId,
+        quantity: productReservations.quantity,
+      })
+
+    for (const reservation of released) {
       await tx
         .update(products)
         .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
         .where(eq(products.id, reservation.productId))
     }
-
-    await tx
-      .update(productReservations)
-      .set({ releasedAt: now })
-      .where(inArray(productReservations.id, expired.map((r) => r.id)))
   })
 }

@@ -24,6 +24,9 @@ const mocks = vi.hoisted(() => {
     updateSet,
     updateWhere,
     decrementReturning,
+    reservationUpdateSet: vi.fn(),
+    reservationUpdateWhere: vi.fn(),
+    reservationReleaseReturning: vi.fn(),
     transaction,
     constructEvent: vi.fn(),
     refundCreate: vi.fn(),
@@ -131,7 +134,13 @@ describe("POST /api/stripe/webhook", () => {
     mocks.decrementReturning.mockResolvedValue([{ id: UUID1 }])
     mocks.updateWhere.mockReturnValue({ returning: mocks.decrementReturning })
     mocks.updateSet.mockReturnValue({ where: mocks.updateWhere })
-    mocks.update.mockReturnValue({ set: mocks.updateSet })
+    mocks.reservationReleaseReturning.mockResolvedValue([])
+    mocks.reservationUpdateWhere.mockReturnValue({ returning: mocks.reservationReleaseReturning })
+    mocks.reservationUpdateSet.mockReturnValue({ where: mocks.reservationUpdateWhere })
+    mocks.update.mockImplementation((table: Record<string, unknown>) => {
+      if ("stock" in table) return { set: mocks.updateSet }
+      return { set: mocks.reservationUpdateSet }
+    })
     mocks.transaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) =>
       callback({ insert: mocks.insert, update: mocks.update })
     )
@@ -204,8 +213,8 @@ describe("POST /api/stripe/webhook", () => {
       setupSelects(false, [{ id: UUID1, slug: "test", active: true, stock: 0 }])
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
-      expect(mocks.transaction).toHaveBeenCalledOnce()
-      expect(mocks.update).not.toHaveBeenCalled()
+      expect(mocks.transaction).toHaveBeenCalledTimes(2)
+      expect(mocks.decrementReturning).not.toHaveBeenCalled()
       expect(mocks.refundCreate).toHaveBeenCalledOnce()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
@@ -217,8 +226,8 @@ describe("POST /api/stripe/webhook", () => {
       setupSelects(false, [{ id: UUID1, slug: "test", active: false, stock: 10 }])
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
-      expect(mocks.transaction).toHaveBeenCalledOnce()
-      expect(mocks.update).not.toHaveBeenCalled()
+      expect(mocks.transaction).toHaveBeenCalledTimes(2)
+      expect(mocks.decrementReturning).not.toHaveBeenCalled()
       expect(mocks.refundCreate).toHaveBeenCalledOnce()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
@@ -233,7 +242,7 @@ describe("POST /api/stripe/webhook", () => {
       mocks.decrementReturning.mockResolvedValueOnce([])
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
-      expect(mocks.transaction).toHaveBeenCalledTimes(2)
+      expect(mocks.transaction).toHaveBeenCalledTimes(3)
       expect(mocks.refundCreate).toHaveBeenCalledOnce()
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
