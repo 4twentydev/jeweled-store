@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
-  isRateLimited: vi.fn().mockResolvedValue(false),
-  recordAttempt: vi.fn().mockResolvedValue(undefined),
+  consumeRateLimit: vi.fn().mockResolvedValue(true),
 }))
 
 vi.mock("@/lib/env", () => ({
@@ -10,8 +9,7 @@ vi.mock("@/lib/env", () => ({
 }))
 
 vi.mock("@/lib/db-rate-limit", () => ({
-  isRateLimited: mocks.isRateLimited,
-  recordAttempt: mocks.recordAttempt,
+  consumeRateLimit: mocks.consumeRateLimit,
 }))
 
 vi.mock("@vercel/blob", () => ({
@@ -32,7 +30,7 @@ describe("POST /api/custom-request-upload", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     process.env.BLOB_READ_WRITE_TOKEN = "blob-token"
-    mocks.isRateLimited.mockResolvedValue(false)
+    mocks.consumeRateLimit.mockResolvedValue(true)
   })
 
   it("rejects cross-origin uploads before rate-limit or file work", async () => {
@@ -40,17 +38,15 @@ describe("POST /api/custom-request-upload", () => {
 
     expect(res.status).toBe(403)
     expect((await res.json()).error).toMatch(/Invalid request origin/)
-    expect(mocks.isRateLimited).not.toHaveBeenCalled()
-    expect(mocks.recordAttempt).not.toHaveBeenCalled()
+    expect(mocks.consumeRateLimit).not.toHaveBeenCalled()
   })
 
   it("returns 429 when the upload bucket is exhausted before parsing files", async () => {
-    mocks.isRateLimited.mockResolvedValue(true)
+    mocks.consumeRateLimit.mockResolvedValue(false)
 
     const res = await POST(makeRequest())
 
     expect(res.status).toBe(429)
     expect((await res.json()).error).toMatch(/Too many uploads/)
-    expect(mocks.recordAttempt).not.toHaveBeenCalled()
   })
 })

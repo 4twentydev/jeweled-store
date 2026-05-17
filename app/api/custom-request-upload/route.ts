@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { customRequestUploadAttempts } from "@/db/schema"
 import { getEnv } from "@/lib/env"
-import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { consumeRateLimit } from "@/lib/db-rate-limit"
 import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 import { ImageUploadError, normalizeImageUpload } from "@/lib/image-upload"
 
@@ -21,13 +21,12 @@ export async function POST(req: Request) {
   }
 
   const ip = getClientIp(req)
-  if (await isRateLimited(customRequestUploadAttempts, ip, UPLOAD_LIMIT, UPLOAD_WINDOW_MS)) {
+  if (!(await consumeRateLimit(customRequestUploadAttempts, ip, UPLOAD_LIMIT, UPLOAD_WINDOW_MS))) {
     return NextResponse.json(
       { error: "Too many uploads. Please try again later." },
       { status: 429 }
     )
   }
-  await recordAttempt(customRequestUploadAttempts, ip, UPLOAD_WINDOW_MS)
 
   let form: FormData
   try {

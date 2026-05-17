@@ -9,6 +9,7 @@ import { randomUUID } from "crypto"
 import { z } from "zod"
 import type Stripe from "stripe"
 import { processPendingNotifications } from "@/lib/notifications"
+import { releaseReservationsBySession } from "@/lib/reservations"
 
 function isUniqueConstraintViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && "code" in err && (err as { code: unknown }).code === "23505"
@@ -41,35 +42,6 @@ const metadataItemsSchema = z
     })
   )
   .min(1)
-
-async function releaseReservationsBySession(sessionId: string) {
-  const db = getDb()
-
-  await db.transaction(async (tx) => {
-    const released = await tx
-      .update(productReservations)
-      .set({ releasedAt: new Date() })
-      .where(
-        and(
-          eq(productReservations.stripeCheckoutSessionId, sessionId),
-          isNull(productReservations.fulfilledAt),
-          isNull(productReservations.releasedAt)
-        )
-      )
-      .returning({
-        id: productReservations.id,
-        productId: productReservations.productId,
-        quantity: productReservations.quantity,
-      })
-
-    for (const reservation of released) {
-      await tx
-        .update(products)
-        .set({ stock: sql`${products.stock} + ${reservation.quantity}` })
-        .where(eq(products.id, reservation.productId))
-    }
-  })
-}
 
 export async function POST(request: Request) {
   const body = await request.text()

@@ -1,7 +1,6 @@
 import { getDb } from "@/db"
 import { products, orders, customRequests, notificationEvents } from "@/db/schema"
 import { count, desc, eq, ilike, ne, or, sum } from "drizzle-orm"
-import { cleanupExpiredReservations } from "@/lib/reservations"
 
 export async function getAllProducts({
   page = 1,
@@ -12,7 +11,6 @@ export async function getAllProducts({
   pageSize?: number
   query?: string
 } = {}) {
-  await cleanupExpiredReservations()
   const offset = Math.max(0, (page - 1) * pageSize)
   const filters = query?.trim()
     ? or(

@@ -1,10 +1,8 @@
 import { getDb } from "@/db"
 import { products, type ProductCategory } from "@/db/schema"
 import { eq, and, ne, desc } from "drizzle-orm"
-import { cleanupExpiredReservations } from "@/lib/reservations"
 
 export async function getProducts() {
-  await cleanupExpiredReservations()
   return getDb()
     .select()
     .from(products)
@@ -13,7 +11,6 @@ export async function getProducts() {
 }
 
 export async function getProductsByCategory(category: ProductCategory) {
-  await cleanupExpiredReservations()
   return getDb()
     .select()
     .from(products)
@@ -22,7 +19,6 @@ export async function getProductsByCategory(category: ProductCategory) {
 }
 
 export async function getFeaturedProducts(limit = 3) {
-  await cleanupExpiredReservations()
   return getDb()
     .select()
     .from(products)
@@ -32,7 +28,6 @@ export async function getFeaturedProducts(limit = 3) {
 }
 
 export async function getProductBySlug(slug: string) {
-  await cleanupExpiredReservations()
   const [product] = await getDb()
     .select()
     .from(products)
@@ -41,7 +36,6 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getRelatedProducts(category: ProductCategory, excludeId: string, limit = 4) {
-  await cleanupExpiredReservations()
   return getDb()
     .select()
     .from(products)

@@ -56,13 +56,14 @@ vi.mock("@/lib/env", () => ({
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("@/lib/reservations", () => ({
   cleanupExpiredReservations: vi.fn().mockResolvedValue(undefined),
+  releaseReservationsBySession: vi.fn().mockResolvedValue(undefined),
 }))
 vi.mock("@/lib/notifications", () => ({
   processPendingNotifications: vi.fn().mockResolvedValue(undefined),
 }))
 
 import { POST } from "@/app/api/stripe/webhook/route"
-import { cleanupExpiredReservations } from "@/lib/reservations"
+import { cleanupExpiredReservations, releaseReservationsBySession } from "@/lib/reservations"
 
 // --- Helpers ---
 
@@ -213,9 +214,10 @@ describe("POST /api/stripe/webhook", () => {
       setupSelects(false, [{ id: UUID1, slug: "test", active: true, stock: 0 }])
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
-      expect(mocks.transaction).toHaveBeenCalledTimes(2)
+      expect(mocks.transaction).toHaveBeenCalledOnce()
       expect(mocks.decrementReturning).not.toHaveBeenCalled()
       expect(mocks.refundCreate).toHaveBeenCalledOnce()
+      expect(releaseReservationsBySession).toHaveBeenCalledWith(SESSION_ID)
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
       )
@@ -226,9 +228,10 @@ describe("POST /api/stripe/webhook", () => {
       setupSelects(false, [{ id: UUID1, slug: "test", active: false, stock: 10 }])
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
-      expect(mocks.transaction).toHaveBeenCalledTimes(2)
+      expect(mocks.transaction).toHaveBeenCalledOnce()
       expect(mocks.decrementReturning).not.toHaveBeenCalled()
       expect(mocks.refundCreate).toHaveBeenCalledOnce()
+      expect(releaseReservationsBySession).toHaveBeenCalledWith(SESSION_ID)
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
       )
@@ -242,8 +245,9 @@ describe("POST /api/stripe/webhook", () => {
       mocks.decrementReturning.mockResolvedValueOnce([])
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
-      expect(mocks.transaction).toHaveBeenCalledTimes(3)
+      expect(mocks.transaction).toHaveBeenCalledTimes(2)
       expect(mocks.refundCreate).toHaveBeenCalledOnce()
+      expect(releaseReservationsBySession).toHaveBeenCalledWith(SESSION_ID)
       expect(mocks.insertValues).toHaveBeenCalledWith(
         expect.objectContaining({ status: "cancelled" })
       )

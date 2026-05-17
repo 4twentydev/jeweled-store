@@ -5,7 +5,7 @@ import { adminLoginSchema } from "@/lib/validators"
 import { getEnv } from "@/lib/env"
 import { setAdminCookie } from "@/lib/auth"
 import { adminLoginAttempts } from "@/db/schema"
-import { clearAttempts, isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { clearAttempts, consumeRateLimit } from "@/lib/db-rate-limit"
 
 type LoginState = { error: string } | undefined
 
@@ -50,24 +50,13 @@ async function verifyPasswordConstantTime(submitted: string): Promise<boolean> {
   return diff === 0
 }
 
-async function countRecentFailures(ip: string | null): Promise<number> {
+async function consumeLoginAttempt(ip: string | null): Promise<boolean> {
   try {
-    if (!ip) return 0
-    return (await isRateLimited(adminLoginAttempts, ip, MAX_ATTEMPTS, WINDOW_MS))
-      ? MAX_ATTEMPTS
-      : 0
+    if (!ip) return true
+    return consumeRateLimit(adminLoginAttempts, ip, MAX_ATTEMPTS, WINDOW_MS)
   } catch {
     // DB unavailable — fail open to preserve admin access; rate limiting is defense-in-depth
-    return 0
-  }
-}
-
-async function recordFailure(ip: string | null): Promise<void> {
-  try {
-    if (!ip) return
-    await recordAttempt(adminLoginAttempts, ip, WINDOW_MS)
-  } catch {
-    // non-fatal — rate limit state is best-effort
+    return true
   }
 }
 
@@ -88,25 +77,23 @@ export async function adminLogin(
   const headersList = await headers()
   const ip = getClientIp(headersList)
 
-  const failures = await countRecentFailures(ip)
-  if (failures >= MAX_ATTEMPTS) {
-    return { error: "Too many attempts. Please wait 15 minutes." }
-  }
-
   const parsed = adminLoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   })
   if (!parsed.success) return { error: "Invalid input" }
 
+  const allowed = await consumeLoginAttempt(ip)
+  if (!allowed) {
+    return { error: "Too many attempts. Please wait 15 minutes." }
+  }
+
   if (parsed.data.email.trim().toLowerCase() !== getEnv().ADMIN_EMAIL.trim().toLowerCase()) {
-    await recordFailure(ip)
     return { error: "Invalid credentials" }
   }
 
   const valid = await verifyPasswordConstantTime(parsed.data.password)
   if (!valid) {
-    await recordFailure(ip)
     return { error: "Invalid credentials" }
   }
 

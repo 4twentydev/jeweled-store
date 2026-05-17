@@ -8,7 +8,7 @@ import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 import { checkoutAttempts, productReservations, products } from "@/db/schema"
 import { and, eq, gte, inArray, sql } from "drizzle-orm"
 import crypto from "crypto"
-import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { consumeRateLimit } from "@/lib/db-rate-limit"
 import {
   cleanupExpiredReservations,
   createReservationToken,
@@ -17,6 +17,7 @@ import {
 
 const CHECKOUT_LIMIT = 10
 const CHECKOUT_WINDOW_MS = 15 * 60 * 1000
+const STRIPE_CHECKOUT_EXPIRY_BUFFER_SECONDS = 60
 
 export async function POST(request: Request) {
   let env: ReturnType<typeof getCheckoutEnv>
@@ -50,7 +51,7 @@ async function createCheckoutSession(
   env: ReturnType<typeof getCheckoutEnv>
 ) {
   const ip = getClientIp(request)
-  if (await isRateLimited(checkoutAttempts, ip, CHECKOUT_LIMIT, CHECKOUT_WINDOW_MS)) {
+  if (!(await consumeRateLimit(checkoutAttempts, ip, CHECKOUT_LIMIT, CHECKOUT_WINDOW_MS))) {
     return NextResponse.json(
       { error: "Too many checkout attempts. Please try again later." },
       { status: 429 }
@@ -70,7 +71,6 @@ async function createCheckoutSession(
   }
 
   const { email, items } = parsed.data
-  await recordAttempt(checkoutAttempts, ip, CHECKOUT_WINDOW_MS)
   await cleanupExpiredReservations()
 
   const aggregatedItems = Array.from(
@@ -161,7 +161,9 @@ async function createCheckoutSession(
       line_items: lineItems,
       success_url: `${env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}&lookup_token=${lookupToken}`,
       cancel_url: `${env.NEXT_PUBLIC_APP_URL}/cart`,
-      expires_at: Math.floor(reservationExpiry.getTime() / 1000),
+      expires_at:
+        Math.floor(reservationExpiry.getTime() / 1000) +
+        STRIPE_CHECKOUT_EXPIRY_BUFFER_SECONDS,
       metadata: {
         lookupToken,
         reservationToken,

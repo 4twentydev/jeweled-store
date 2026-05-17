@@ -9,6 +9,7 @@ const envSchema = z.object({
   ADMIN_EMAIL: z.email(),
   ADMIN_PASSWORD: z.string().min(1),
   ADMIN_SECRET: z.string().min(32),
+  CRON_SECRET: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   ADMIN_NOTIFICATION_EMAIL: z.email().optional(),
 })
@@ -42,6 +43,7 @@ export function getEnv(): Env {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
     ADMIN_SECRET: process.env.ADMIN_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL,
   })

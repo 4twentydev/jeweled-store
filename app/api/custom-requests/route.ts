@@ -5,7 +5,7 @@ import { customRequestAttempts, customRequests } from "@/db/schema"
 import { getEnv } from "@/lib/env"
 import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 import { customRequestSchema } from "@/lib/validators"
-import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
+import { consumeRateLimit } from "@/lib/db-rate-limit"
 import { processPendingNotifications, queueNotification } from "@/lib/notifications"
 
 const CUSTOM_REQUEST_LIMIT = 3
@@ -17,13 +17,19 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request)
-  if (await isRateLimited(customRequestAttempts, ip, CUSTOM_REQUEST_LIMIT, CUSTOM_REQUEST_WINDOW_MS)) {
+  if (
+    !(await consumeRateLimit(
+      customRequestAttempts,
+      ip,
+      CUSTOM_REQUEST_LIMIT,
+      CUSTOM_REQUEST_WINDOW_MS
+    ))
+  ) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
       { status: 429 }
     )
   }
-  await recordAttempt(customRequestAttempts, ip, CUSTOM_REQUEST_WINDOW_MS)
 
   let body: unknown
   try {

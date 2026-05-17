@@ -40,8 +40,7 @@ vi.mock("@/lib/env", () => ({
 }))
 
 vi.mock("@/lib/db-rate-limit", () => ({
-  isRateLimited: vi.fn().mockResolvedValue(false),
-  recordAttempt: vi.fn().mockResolvedValue(undefined),
+  consumeRateLimit: vi.fn().mockResolvedValue(true),
 }))
 
 vi.mock("@/lib/reservations", () => ({
@@ -51,8 +50,7 @@ vi.mock("@/lib/reservations", () => ({
 }))
 
 import { POST } from "@/app/api/checkout/route"
-import { isRateLimited, recordAttempt } from "@/lib/db-rate-limit"
-import { cleanupExpiredReservations } from "@/lib/reservations"
+import { consumeRateLimit } from "@/lib/db-rate-limit"
 
 const fakeProduct = {
   id: UUID1,
@@ -74,9 +72,7 @@ function makeRequest(body: unknown) {
 describe("POST /api/checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(isRateLimited).mockResolvedValue(false)
-    vi.mocked(recordAttempt).mockResolvedValue(undefined)
-    vi.mocked(cleanupExpiredReservations).mockResolvedValue(undefined)
+    vi.mocked(consumeRateLimit).mockResolvedValue(true)
     mocks.sessionCreate.mockResolvedValue({
       id: "cs_test_123",
       url: "https://stripe.com/checkout/test",
@@ -186,6 +182,14 @@ describe("POST /api/checkout", () => {
     expect(res.status).toBe(200)
     expect((await res.json()).url).toBe("https://stripe.com/checkout/test")
     expect(mocks.sessionCreate).toHaveBeenCalledOnce()
+  })
+
+  it("adds expiry margin so Stripe does not reject near-minimum sessions", async () => {
+    mocks.selectWhere.mockResolvedValue([fakeProduct])
+    await POST(makeRequest({ email: "test@example.com", items: [{ productId: UUID1, quantity: 1 }] }))
+
+    const call = mocks.sessionCreate.mock.calls[0][0]
+    expect(call.expires_at).toBe(Math.floor(new Date("2026-01-01T00:30:00.000Z").getTime() / 1000) + 60)
   })
 
   it("forwards customer_email and correct line-item amounts to Stripe", async () => {
