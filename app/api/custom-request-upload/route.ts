@@ -2,17 +2,35 @@ import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { customRequestUploadAttempts } from "@/db/schema"
-import { getEnv } from "@/lib/env"
 import { consumeRateLimit } from "@/lib/db-rate-limit"
-import { getClientIp, isAllowedOrigin } from "@/lib/request-guards"
+import { checkRateLimit, getClientIp, isAllowedOrigin } from "@/lib/request-guards"
 import { ImageUploadError, normalizeImageUpload } from "@/lib/image-upload"
 
 const OUTPUT_QUALITY = 84
 const UPLOAD_LIMIT = 20
 const UPLOAD_WINDOW_MS = 60 * 60 * 1000
 
+async function consumeUploadLimit(ip: string): Promise<boolean> {
+  try {
+    return await consumeRateLimit(
+      customRequestUploadAttempts,
+      ip,
+      UPLOAD_LIMIT,
+      UPLOAD_WINDOW_MS
+    )
+  } catch (error) {
+    console.error("[custom request upload] db rate limit unavailable:", error)
+    return checkRateLimit({
+      key: `custom-request-upload:${ip}`,
+      limit: UPLOAD_LIMIT,
+      windowMs: UPLOAD_WINDOW_MS,
+    })
+  }
+}
+
 export async function POST(req: Request) {
-  if (!isAllowedOrigin(req, getEnv().NEXT_PUBLIC_APP_URL)) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin
+  if (!isAllowedOrigin(req, appUrl)) {
     return NextResponse.json({ error: "Invalid request origin" }, { status: 403 })
   }
 
@@ -21,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   const ip = getClientIp(req)
-  if (!(await consumeRateLimit(customRequestUploadAttempts, ip, UPLOAD_LIMIT, UPLOAD_WINDOW_MS))) {
+  if (!(await consumeUploadLimit(ip))) {
     return NextResponse.json(
       { error: "Too many uploads. Please try again later." },
       { status: 429 }

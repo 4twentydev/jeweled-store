@@ -10,6 +10,8 @@ const BUDGET_OPTIONS = [
   { value: "50", label: "$50" },
 ] satisfies { value: string; label: string }[]
 
+const ACCEPTED_REFERENCE_IMAGE_TYPES = "image/jpeg,image/png,image/webp,image/gif,image/avif"
+
 export default function CustomPage() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -195,7 +197,7 @@ export default function CustomPage() {
                 <div className="space-y-3">
                   <input
                     type="file"
-                    accept="image/*"
+                    accept={ACCEPTED_REFERENCE_IMAGE_TYPES}
                     multiple
                     onChange={(event) => void handleReferenceUpload(event.target.files)}
                     disabled={uploading || referenceImages.length >= MAX_CUSTOM_REFERENCE_IMAGES}
