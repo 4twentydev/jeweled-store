@@ -16,6 +16,17 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: "text-red-400",
 }
 
+const BUDGET_LABEL: Record<string, string> = {
+  "25": "$25",
+  "35": "$35",
+  "50": "$50",
+  "under-200": "Under $200",
+  "200-500": "$200-$500",
+  "500-1000": "$500-$1,000",
+  "1000-2500": "$1,000-$2,500",
+  "2500-plus": "$2,500+",
+}
+
 export default async function AdminCustomRequestsPage({
   searchParams,
 }: {
@@ -84,7 +95,7 @@ export default async function AdminCustomRequestsPage({
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <span className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground">
-                        {request.budgetRange}
+                        {BUDGET_LABEL[request.budgetRange] ?? request.budgetRange}
                       </span>
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">

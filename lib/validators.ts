@@ -75,7 +75,7 @@ export const customRequestSchema = z.object({
   customerName: z.string().min(2).max(100),
   itemDescription: z.string().min(20).max(2000),
   referenceImages: z.array(blobImageUrlSchema).max(MAX_CUSTOM_REFERENCE_IMAGES).default([]),
-  budgetRange: z.enum(["under-200", "200-500", "500-1000", "1000-2500", "2500-plus"]),
+  budgetRange: z.enum(["25", "35", "50"]),
 })
 
 export type CustomRequestInput = z.infer<typeof customRequestSchema>

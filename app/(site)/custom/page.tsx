@@ -5,11 +5,9 @@ import { FadeUp } from "@/components/fade-up"
 import { MAX_CUSTOM_REFERENCE_IMAGES } from "@/lib/validators"
 
 const BUDGET_OPTIONS = [
-  { value: "under-200", label: "Under $200" },
-  { value: "200-500", label: "$200–$500" },
-  { value: "500-1000", label: "$500–$1,000" },
-  { value: "1000-2500", label: "$1,000–$2,500" },
-  { value: "2500-plus", label: "$2,500+" },
+  { value: "25", label: "$25" },
+  { value: "35", label: "$35" },
+  { value: "50", label: "$50" },
 ] satisfies { value: string; label: string }[]
 
 export default function CustomPage() {
@@ -181,7 +179,7 @@ export default function CustomPage() {
                   required
                   className="w-full bg-background border border-border/50 px-4 py-3 text-sm text-foreground focus:outline-none focus:border-foreground/50 transition-colors"
                 >
-                  <option value="">Select a range</option>
+                  <option value="">Select a budget</option>
                   {BUDGET_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}

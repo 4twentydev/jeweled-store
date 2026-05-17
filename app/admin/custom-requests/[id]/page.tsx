@@ -8,6 +8,9 @@ import { isAdmin } from "@/lib/auth"
 import { formatCurrency } from "@/lib/utils"
 
 const BUDGET_LABEL: Record<string, string> = {
+  "25": "$25",
+  "35": "$35",
+  "50": "$50",
   "under-200": "Under $200",
   "200-500": "$200-$500",
   "500-1000": "$500-$1,000",
