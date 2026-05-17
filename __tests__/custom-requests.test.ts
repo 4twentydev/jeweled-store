@@ -69,6 +69,26 @@ describe("POST /api/custom-requests", () => {
     expect(json.fieldErrors.itemDescription).toEqual([
       "Tell us a little more about the object or vision.",
     ])
+    expect(mocks.consumeRateLimit).not.toHaveBeenCalled()
+    expect(mocks.insertValues).not.toHaveBeenCalled()
+  })
+
+  it("rate limits only after the request body is valid", async () => {
+    mocks.consumeRateLimit.mockResolvedValue(false)
+
+    const res = await POST(
+      makeRequest({
+        customerName: "Test Buyer",
+        customerEmail: "buyer@example.com",
+        itemDescription: "Please make a crystal lighter case with pink accents.",
+        budgetRange: "35",
+        referenceImages: [],
+      })
+    )
+
+    expect(res.status).toBe(429)
+    expect((await res.json()).error).toBe("Too many requests. Please try again later.")
+    expect(mocks.consumeRateLimit).toHaveBeenCalledOnce()
     expect(mocks.insertValues).not.toHaveBeenCalled()
   })
 
