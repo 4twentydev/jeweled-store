@@ -222,8 +222,9 @@ export default function CustomPage() {
                     </div>
                   )}
                   <p className="text-[11px] text-muted-foreground/70">
-                    Upload up to {MAX_CUSTOM_REFERENCE_IMAGES} images. We store them securely for
-                    the request instead of accepting arbitrary links.
+                    Upload up to {MAX_CUSTOM_REFERENCE_IMAGES} images for ideas, color direction,
+                    and details. Exact recreations may not be possible depending on available
+                    materials, scale, and stone placement.
                   </p>
                 </div>
               </div>
