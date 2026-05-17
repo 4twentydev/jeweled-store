@@ -74,8 +74,10 @@ export default function CustomPage() {
       })
 
       if (!res.ok) {
-        const json = (await res.json()) as { error?: unknown }
-        setError(typeof json.error === "string" ? json.error : "Please check the form and try again.")
+        const json = (await res.json().catch(() => ({}))) as { error?: unknown }
+        setError(
+          typeof json.error === "string" ? json.error : "Please check the form and try again."
+        )
         setLoading(false)
         return
       }

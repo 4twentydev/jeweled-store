@@ -10,6 +10,7 @@ import { processPendingNotifications, queueNotification } from "@/lib/notificati
 
 const CUSTOM_REQUEST_LIMIT = 3
 const CUSTOM_REQUEST_WINDOW_MS = 60 * 60 * 1000
+const VALIDATION_ERROR_MESSAGE = "Please check the form and try again."
 
 export async function POST(request: Request) {
   if (!isAllowedOrigin(request, getEnv().NEXT_PUBLIC_APP_URL)) {
@@ -40,7 +41,15 @@ export async function POST(request: Request) {
 
   const parsed = customRequestSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+    const flattened = parsed.error.flatten()
+    const fieldMessages = Object.values(flattened.fieldErrors).flatMap((messages) => messages ?? [])
+    return NextResponse.json(
+      {
+        error: fieldMessages[0] ?? flattened.formErrors[0] ?? VALIDATION_ERROR_MESSAGE,
+        fieldErrors: flattened.fieldErrors,
+      },
+      { status: 400 }
+    )
   }
 
   const { customerName, customerEmail, itemDescription, budgetRange, referenceImages } = parsed.data

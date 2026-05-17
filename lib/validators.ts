@@ -71,9 +71,13 @@ export const checkoutSchema = z.object({
 export type CheckoutInput = z.infer<typeof checkoutSchema>
 
 export const customRequestSchema = z.object({
-  customerEmail: z.email(),
-  customerName: z.string().min(2).max(100),
-  itemDescription: z.string().min(20).max(2000),
+  customerEmail: z.string().trim().pipe(z.email()),
+  customerName: z.string().trim().min(2, "Enter your name.").max(100),
+  itemDescription: z
+    .string()
+    .trim()
+    .min(20, "Tell us a little more about the object or vision.")
+    .max(2000),
   referenceImages: z.array(blobImageUrlSchema).max(MAX_CUSTOM_REFERENCE_IMAGES).default([]),
   budgetRange: z.enum(["25", "35", "50"]),
 })
