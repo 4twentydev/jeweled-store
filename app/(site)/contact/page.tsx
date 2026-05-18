@@ -57,12 +57,12 @@ export default function ContactPage() {
                   Instagram
                 </p>
                 <a
-                  href="https://instagram.com"
+                  href="https://instagram.com/spacecadet20k"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-foreground/70 transition-colors"
                 >
-                  @jwld.store
+                  @spacecadet20k
                 </a>
               </div>
             </div>
