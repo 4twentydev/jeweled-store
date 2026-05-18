@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
 import { getAllProducts } from "@/db/queries/admin"
@@ -88,10 +89,29 @@ export default async function AdminProductsPage({
                     className="border-b border-border/40 last:border-0 hover:bg-muted/10 transition-colors"
                   >
                     <td className="px-4 py-3">
-                      <p className="text-sm">{product.name}</p>
-                      <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
-                        {product.slug}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="relative size-12 shrink-0 overflow-hidden border border-border/50 bg-muted/20">
+                          {product.images[0] ? (
+                            <Image
+                              src={product.images[0]}
+                              alt=""
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-full items-center justify-center text-[9px] tracking-[0.18em] uppercase text-muted-foreground/60">
+                              No Img
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm">{product.name}</p>
+                          <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground">
+                            {product.slug}
+                          </p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <span className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground">
