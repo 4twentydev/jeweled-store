@@ -7,21 +7,21 @@ import { ArrowRight } from "lucide-react";
 
 export function Hero() {
     return (
-        <section className="relative min-h-[82svh] md:min-h-[92vh] flex flex-col overflow-hidden">
+        <section className="relative min-h-[calc(100svh-4rem)] md:min-h-[92vh] flex flex-col overflow-hidden">
             {/* Hero background image */}
             <Image
                 src="/hero.png"
                 alt=""
                 fill
                 priority
-                className="object-cover object-[63%_center] md:object-center"
+                className="object-cover object-[70%_center] sm:object-[66%_center] md:object-center"
                 sizes="100vw"
             />
             {/* Dark overlay for text legibility */}
-            <div className="absolute inset-0 bg-black/60 md:bg-black/55" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/45 to-black/80 md:bg-black/55" />
 
             {/* Content — bottom-left anchored */}
-            <div className="relative z-10 mt-auto max-w-[1400px] mx-auto w-full px-6 lg:px-12 pb-20 md:pb-36">
+            <div className="relative z-10 mt-auto max-w-[1400px] mx-auto w-full px-6 lg:px-12 pt-28 pb-14 sm:pb-20 md:pb-36">
                 <div className="max-w-[560px]">
                     <motion.p
                         initial={false}
@@ -40,8 +40,7 @@ export function Hero() {
                             ease: [0.16, 1, 0.3, 1],
                             delay: 0.1,
                         }}
-                        className="font-light tracking-tight text-foreground leading-[1.04] mb-12"
-                        style={{ fontSize: "clamp(2.6rem, 6.5vw, 5.5rem)" }}
+                        className="font-light tracking-tight text-foreground leading-[1.04] mb-10 text-[3rem] sm:text-[4.25rem] md:text-[5.5rem] md:mb-12"
                     >
                         Catch
                         <br className="hidden sm:block" /> the Light.

@@ -21,9 +21,9 @@ const LEGAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/40 py-16 px-6 lg:px-12">
+    <footer className="border-t border-border/40 px-6 py-14 sm:py-16 lg:px-12">
       <div className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 md:gap-12 mb-14 md:mb-16">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <p className="text-[11px] tracking-[0.45em] uppercase mb-5">jwld</p>
@@ -95,16 +95,16 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-8 border-t border-border/40">
-          <p className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 pt-8 border-t border-border/40">
+          <p className="text-[10px] leading-relaxed tracking-[0.15em] uppercase text-muted-foreground">
             © {new Date().getFullYear()} jwld. All rights reserved.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
             {LEGAL_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground/60 transition-colors"
+                className="text-[10px] leading-none tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground/60 transition-colors"
               >
                 {item.label}
               </Link>

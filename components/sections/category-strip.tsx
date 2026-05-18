@@ -31,7 +31,7 @@ export function CategoryStrip() {
                 href={`/products?category=${cat.slug}`}
                 aria-label={`Browse ${cat.label}`}
                 className={cn(
-                  "group relative block overflow-hidden min-h-[200px] lg:min-h-[300px]"
+                  "group relative block aspect-[3/4] overflow-hidden lg:min-h-[300px]"
                 )}
               >
                 <Image
