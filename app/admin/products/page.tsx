@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/admin/shell"
+import { DeleteProductButton } from "@/components/admin/delete-product-button"
 import { getAllProducts } from "@/db/queries/admin"
 import { toggleProductActive } from "@/server/actions/admin"
 import { isAdmin } from "@/lib/auth"
@@ -146,12 +147,15 @@ export default async function AdminProductsPage({
                       </form>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/admin/products/${product.id}/edit`}
-                        className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        Edit
-                      </Link>
+                      <div className="flex flex-col items-end gap-2">
+                        <Link
+                          href={`/admin/products/${product.id}/edit`}
+                          className="text-[10px] tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          Edit
+                        </Link>
+                        <DeleteProductButton productId={product.id} productName={product.name} />
+                      </div>
                     </td>
                   </tr>
                 ))}

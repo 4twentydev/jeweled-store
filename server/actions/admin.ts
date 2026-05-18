@@ -4,8 +4,9 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { isAdmin, clearAdminCookie } from "@/lib/auth"
 import { getDb } from "@/db"
-import { products, orders, customRequests } from "@/db/schema"
-import { eq } from "drizzle-orm"
+import { products, orders, customRequests, orderItems, productReservations } from "@/db/schema"
+import { count, eq } from "drizzle-orm"
+import { z } from "zod"
 import {
   customRequestAdminSchema,
   productFormSchema,
@@ -16,6 +17,7 @@ import type { CustomRequestStatus, OrderStatus } from "@/db/schema"
 import { processPendingNotifications, queueNotification } from "@/lib/notifications"
 
 type ActionResult = { error: string } | undefined
+type DeleteProductState = { error?: string; ok?: boolean } | undefined
 
 async function requireAdmin(): Promise<void> {
   if (!(await isAdmin())) redirect("/admin/login")
@@ -120,6 +122,53 @@ export async function toggleProductActive(formData: FormData): Promise<void> {
   revalidatePath("/")
   revalidatePath("/products")
   if (product?.slug) revalidatePath(`/product/${product.slug}`)
+}
+
+export async function deleteProduct(
+  _prevState: DeleteProductState,
+  formData: FormData
+): Promise<DeleteProductState> {
+  await requireAdmin()
+
+  const parsedId = z.string().uuid().safeParse(formData.get("id"))
+  if (!parsedId.success) return { error: "Invalid product" }
+
+  const id = parsedId.data
+  const db = getDb()
+  const [product] = await db
+    .select({ slug: products.slug })
+    .from(products)
+    .where(eq(products.id, id))
+
+  if (!product) return { error: "Product not found" }
+
+  const [orderUsage, reservationUsage] = await Promise.all([
+    db
+      .select({ total: count() })
+      .from(orderItems)
+      .where(eq(orderItems.productId, id)),
+    db
+      .select({ total: count() })
+      .from(productReservations)
+      .where(eq(productReservations.productId, id)),
+  ])
+
+  if ((orderUsage[0]?.total ?? 0) > 0 || (reservationUsage[0]?.total ?? 0) > 0) {
+    return {
+      error:
+        "This product has order or reservation history. Mark it inactive instead.",
+    }
+  }
+
+  await db.delete(products).where(eq(products.id, id))
+
+  revalidatePath("/admin/products")
+  revalidatePath("/admin")
+  revalidatePath("/")
+  revalidatePath("/products")
+  revalidatePath(`/product/${product.slug}`)
+
+  return { ok: true }
 }
 
 export async function updateOrderStatus(
