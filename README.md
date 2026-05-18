@@ -4,6 +4,8 @@ JWLD is a minimalist luxury ecommerce store for handmade bejeweled accessories. 
 
 The app is built with Next.js App Router, React, TypeScript, Tailwind CSS, Drizzle, Neon Postgres, Stripe, Vercel Blob, and Bun.
 
+For the full app reference, see [docs/APP_DOCUMENTATION.md](docs/APP_DOCUMENTATION.md).
+
 ## What This Store Does
 
 - Public storefront with homepage, product collection, product detail pages, cart, checkout, success, about, contact, privacy, terms, and custom request pages.
