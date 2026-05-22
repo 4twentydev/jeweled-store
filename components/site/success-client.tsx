@@ -14,6 +14,25 @@ function formatPrice(cents: number) {
   }).format(cents / 100)
 }
 
+function SuccessActions() {
+  return (
+    <div className="flex flex-col items-center gap-3 sm:flex-row">
+      <Link
+        href="/"
+        className="text-[10px] tracking-[0.3em] uppercase text-foreground hover:text-foreground/70 transition-colors"
+      >
+        Return Home
+      </Link>
+      <Link
+        href="/products"
+        className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+      >
+        Continue Shopping
+      </Link>
+    </div>
+  )
+}
+
 export function SuccessClient({
   canLookup,
   lookupToken,
@@ -79,12 +98,7 @@ export function SuccessClient({
             receive a confirmation email shortly.
           </p>
         </div>
-        <Link
-          href="/products"
-          className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Continue Shopping
-        </Link>
+        <SuccessActions />
       </div>
     )
   }
@@ -122,12 +136,7 @@ export function SuccessClient({
             <span className="text-[10px] tracking-[0.15em] uppercase">{order.status}</span>
           </div>
         </div>
-        <Link
-          href="/products"
-          className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Continue Shopping
-        </Link>
+        <SuccessActions />
       </div>
     )
   }
@@ -143,12 +152,7 @@ export function SuccessClient({
             confirmation email shortly.
           </p>
         </div>
-        <Link
-          href="/products"
-          className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Continue Shopping
-        </Link>
+        <SuccessActions />
       </div>
     )
   }
