@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   type ReactNode,
 } from "react"
@@ -126,6 +127,9 @@ type CartContextValue = {
   isOpen: boolean
   itemCount: number
   subtotalCents: number
+}
+
+type CartActions = {
   addItem: (item: CartItem) => void
   removeItem: (productId: string) => void
   setQuantity: (productId: string, quantity: number) => void
@@ -134,7 +138,8 @@ type CartContextValue = {
   clearCart: () => void
 }
 
-const CartContext = createContext<CartContextValue | null>(null)
+const CartStateContext = createContext<CartContextValue | null>(null)
+const CartActionsContext = createContext<CartActions | null>(null)
 
 const STORAGE_KEY = "jwld-cart"
 
@@ -162,30 +167,50 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = state.items.reduce((sum, i) => sum + i.quantity, 0)
   const subtotalCents = state.items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0)
+  const cartState = useMemo(
+    () => ({
+      items: state.items,
+      isOpen: state.isOpen,
+      itemCount,
+      subtotalCents,
+    }),
+    [itemCount, state.isOpen, state.items, subtotalCents]
+  )
+  const cartActions = useMemo(
+    () => ({
+      addItem: (item: CartItem) => dispatch({ type: "ADD", payload: item }),
+      removeItem: (productId: string) => dispatch({ type: "REMOVE", productId }),
+      setQuantity: (productId: string, quantity: number) =>
+        dispatch({ type: "SET_QTY", productId, quantity }),
+      openCart: () => dispatch({ type: "OPEN" }),
+      closeCart: () => dispatch({ type: "CLOSE" }),
+      clearCart: () => dispatch({ type: "CLEAR" }),
+    }),
+    []
+  )
 
   return (
-    <CartContext.Provider
-      value={{
-        items: state.items,
-        isOpen: state.isOpen,
-        itemCount,
-        subtotalCents,
-        addItem: (item) => dispatch({ type: "ADD", payload: item }),
-        removeItem: (productId) => dispatch({ type: "REMOVE", productId }),
-        setQuantity: (productId, quantity) =>
-          dispatch({ type: "SET_QTY", productId, quantity }),
-        openCart: () => dispatch({ type: "OPEN" }),
-        closeCart: () => dispatch({ type: "CLOSE" }),
-        clearCart: () => dispatch({ type: "CLEAR" }),
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+    <CartActionsContext.Provider value={cartActions}>
+      <CartStateContext.Provider value={cartState}>{children}</CartStateContext.Provider>
+    </CartActionsContext.Provider>
   )
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext)
-  if (!ctx) throw new Error("useCart must be used within CartProvider")
+  const state = useCartState()
+  const actions = useCartActions()
+
+  return { ...state, ...actions }
+}
+
+export function useCartState() {
+  const ctx = useContext(CartStateContext)
+  if (!ctx) throw new Error("useCartState must be used within CartProvider")
+  return ctx
+}
+
+export function useCartActions() {
+  const ctx = useContext(CartActionsContext)
+  if (!ctx) throw new Error("useCartActions must be used within CartProvider")
   return ctx
 }

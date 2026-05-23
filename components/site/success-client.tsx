@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
-import { useCart } from "@/lib/cart-context"
+import { useCartActions } from "@/lib/cart-context"
 import { lookupOrderBySession, type SuccessOrder } from "@/server/actions/order-lookup"
 
 function formatPrice(cents: number) {
@@ -44,7 +44,7 @@ export function SuccessClient({
   sessionId: string
   initialOrder: SuccessOrder | null
 }) {
-  const { clearCart } = useCart()
+  const { clearCart } = useCartActions()
   const [order, setOrder] = useState<SuccessOrder | null>(initialOrder)
   const [timedOut, setTimedOut] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)

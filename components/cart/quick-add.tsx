@@ -1,7 +1,7 @@
 "use client"
 
 import { Plus } from "lucide-react"
-import { useCart } from "@/lib/cart-context"
+import { useCartActions } from "@/lib/cart-context"
 import type { Product } from "@/types"
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 }
 
 export function QuickAdd({ product }: Props) {
-  const { addItem, openCart } = useCart()
+  const { addItem, openCart } = useCartActions()
 
   if (product.stock === 0) return null
 

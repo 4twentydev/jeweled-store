@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Minus, Plus, ShoppingBag } from "lucide-react"
-import { useCart } from "@/lib/cart-context"
+import { useCartActions } from "@/lib/cart-context"
 import type { Product } from "@/types"
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 
 export function AddToCart({ product }: Props) {
   const [qty, setQty] = useState(1)
-  const { addItem, openCart } = useCart()
+  const { addItem, openCart } = useCartActions()
 
   if (product.stock === 0) return null
 
