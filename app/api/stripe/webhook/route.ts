@@ -8,7 +8,7 @@ import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import { z } from "zod"
 import type Stripe from "stripe"
-import { processPendingNotifications } from "@/lib/notifications"
+import { processPendingNotifications, queueNotification } from "@/lib/notifications"
 import { releaseReservationsBySession } from "@/lib/reservations"
 
 function isUniqueConstraintViolation(err: unknown): boolean {
@@ -16,6 +16,27 @@ function isUniqueConstraintViolation(err: unknown): boolean {
 }
 
 class StockDecrementFailedError extends Error {}
+
+async function acknowledgeInvalidCompletedSession(
+  session: Stripe.Checkout.Session,
+  reason: string,
+  payload: Record<string, unknown> = {}
+) {
+  console.error("[stripe webhook] invalid completed session:", session.id, reason, payload)
+  await queueNotification({
+    kind: "admin_webhook_validation_failed",
+    channel: "admin",
+    recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
+    subject: `Stripe webhook validation failed: ${session.id}`,
+    payload: {
+      sessionId: session.id,
+      reason,
+      ...payload,
+    },
+  })
+  await processPendingNotifications()
+  return NextResponse.json({ received: true })
+}
 
 async function refundUnfulfillableSession(session: Stripe.Checkout.Session) {
   if (session.payment_status && session.payment_status !== "paid") return
@@ -93,7 +114,7 @@ export async function POST(request: Request) {
         .values()
     )
   } catch {
-    return NextResponse.json({ error: "Invalid session metadata" }, { status: 400 })
+    return acknowledgeInvalidCompletedSession(session, "invalid_session_metadata")
   }
 
   const itemsSubtotalCents = cartItems.reduce(
@@ -104,7 +125,10 @@ export async function POST(request: Request) {
     typeof session.amount_subtotal === "number" &&
     session.amount_subtotal !== itemsSubtotalCents
   ) {
-    return NextResponse.json({ error: "Session subtotal mismatch" }, { status: 400 })
+    return acknowledgeInvalidCompletedSession(session, "session_subtotal_mismatch", {
+      amountSubtotal: session.amount_subtotal,
+      itemsSubtotalCents,
+    })
   }
   const totalCents = typeof session.amount_total === "number" ? session.amount_total : itemsSubtotalCents
 

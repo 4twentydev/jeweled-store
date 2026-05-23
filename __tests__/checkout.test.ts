@@ -64,7 +64,7 @@ const fakeProduct = {
 function makeRequest(body: unknown) {
   return new Request("https://example.com/api/checkout", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", origin: "https://example.com" },
     body: JSON.stringify(body),
   })
 }
@@ -95,6 +95,7 @@ describe("POST /api/checkout", () => {
   it("rejects invalid JSON", async () => {
     const req = new Request("https://example.com/api/checkout", {
       method: "POST",
+      headers: { origin: "https://example.com" },
       body: "not-json",
     })
     const res = await POST(req)
@@ -123,6 +124,19 @@ describe("POST /api/checkout", () => {
       items: [{ productId: UUID1, quantity: 0 }],
     }))
     expect(res.status).toBe(400)
+  })
+
+  it("rejects requests with no origin or referer before work begins", async () => {
+    const res = await POST(
+      new Request("https://example.com/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "test@example.com", items: [{ productId: UUID1, quantity: 1 }] }),
+      })
+    )
+    expect(res.status).toBe(403)
+    expect((await res.json()).error).toMatch(/Invalid request origin/)
+    expect(mocks.selectWhere).not.toHaveBeenCalled()
   })
 
   it("rejects unknown product (not in DB or inactive)", async () => {

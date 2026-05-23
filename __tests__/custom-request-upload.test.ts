@@ -40,6 +40,20 @@ describe("POST /api/custom-request-upload", () => {
     expect(mocks.consumeRateLimit).not.toHaveBeenCalled()
   })
 
+  it("rejects uploads with no origin or referer before rate-limit or file work", async () => {
+    const res = await POST(
+      new Request("https://example.com/api/custom-request-upload", {
+        method: "POST",
+        headers: { "x-forwarded-for": "203.0.113.10" },
+        body: new FormData(),
+      })
+    )
+
+    expect(res.status).toBe(403)
+    expect((await res.json()).error).toMatch(/Invalid request origin/)
+    expect(mocks.consumeRateLimit).not.toHaveBeenCalled()
+  })
+
   it("returns 429 when the upload bucket is exhausted before parsing files", async () => {
     mocks.consumeRateLimit.mockResolvedValue(false)
 

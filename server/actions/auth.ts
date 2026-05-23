@@ -6,6 +6,7 @@ import { getEnv } from "@/lib/env"
 import { setAdminCookie } from "@/lib/auth"
 import { adminLoginAttempts } from "@/db/schema"
 import { clearAttempts, consumeRateLimit } from "@/lib/db-rate-limit"
+import { checkRateLimit, resetRateLimit } from "@/lib/request-guards"
 
 type LoginState = { error: string } | undefined
 
@@ -27,6 +28,10 @@ function getClientIp(headersList: Headers): string | null {
 
 const MAX_ATTEMPTS = 5
 const WINDOW_MS = 15 * 60 * 1000
+
+function getFallbackRateLimitKey(ip: string | null): string {
+  return `admin-login:${ip ?? "unknown"}`
+}
 
 // HMAC-based constant-time password comparison — eliminates timing oracle on the raw string
 async function verifyPasswordConstantTime(submitted: string): Promise<boolean> {
@@ -52,15 +57,27 @@ async function verifyPasswordConstantTime(submitted: string): Promise<boolean> {
 
 async function consumeLoginAttempt(ip: string | null): Promise<boolean> {
   try {
-    if (!ip) return true
+    if (!ip) {
+      return checkRateLimit({
+        key: getFallbackRateLimitKey(ip),
+        limit: MAX_ATTEMPTS,
+        windowMs: WINDOW_MS,
+        enforceInTests: true,
+      })
+    }
     return consumeRateLimit(adminLoginAttempts, ip, MAX_ATTEMPTS, WINDOW_MS)
   } catch {
-    // DB unavailable — fail open to preserve admin access; rate limiting is defense-in-depth
-    return true
+    return checkRateLimit({
+      key: getFallbackRateLimitKey(ip),
+      limit: MAX_ATTEMPTS,
+      windowMs: WINDOW_MS,
+      enforceInTests: true,
+    })
   }
 }
 
 async function clearFailures(ip: string | null): Promise<void> {
+  resetRateLimit(getFallbackRateLimitKey(ip))
   try {
     if (!ip) return
     await clearAttempts(adminLoginAttempts, ip)

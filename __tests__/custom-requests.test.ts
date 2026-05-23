@@ -73,6 +73,27 @@ describe("POST /api/custom-requests", () => {
     expect(mocks.insertValues).not.toHaveBeenCalled()
   })
 
+  it("rejects requests with no origin or referer", async () => {
+    const res = await POST(
+      new Request("https://example.com/api/custom-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.10" },
+        body: JSON.stringify({
+          customerName: "Test Buyer",
+          customerEmail: "buyer@example.com",
+          itemDescription: "Please make a crystal lighter case with pink accents.",
+          budgetRange: "35",
+          referenceImages: [],
+        }),
+      })
+    )
+
+    expect(res.status).toBe(403)
+    expect((await res.json()).error).toMatch(/Invalid request origin/)
+    expect(mocks.consumeRateLimit).not.toHaveBeenCalled()
+    expect(mocks.insertValues).not.toHaveBeenCalled()
+  })
+
   it("rate limits only after the request body is valid", async () => {
     mocks.consumeRateLimit.mockResolvedValue(false)
 

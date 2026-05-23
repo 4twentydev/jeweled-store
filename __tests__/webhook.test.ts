@@ -30,6 +30,7 @@ const mocks = vi.hoisted(() => {
     transaction,
     constructEvent: vi.fn(),
     refundCreate: vi.fn(),
+    queueNotification: vi.fn().mockResolvedValue(undefined),
   }
 })
 
@@ -60,6 +61,7 @@ vi.mock("@/lib/reservations", () => ({
 }))
 vi.mock("@/lib/notifications", () => ({
   processPendingNotifications: vi.fn().mockResolvedValue(undefined),
+  queueNotification: mocks.queueNotification,
 }))
 
 import { POST } from "@/app/api/stripe/webhook/route"
@@ -194,17 +196,37 @@ describe("POST /api/stripe/webhook", () => {
   })
 
   describe("metadata validation", () => {
-    it("returns 400 for unparseable metadata JSON", async () => {
+    it("acknowledges unparseable metadata JSON and queues an admin notification", async () => {
       mocks.constructEvent.mockReturnValue(makeEvent(makeSession({ metadata: { items: "bad-json" } })))
       const res = await POST(makeRequest())
-      expect(res.status).toBe(400)
+      expect(res.status).toBe(200)
+      expect((await res.json()).received).toBe(true)
+      expect(mocks.queueNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: "admin_webhook_validation_failed",
+          payload: expect.objectContaining({
+            sessionId: SESSION_ID,
+            reason: "invalid_session_metadata",
+          }),
+        })
+      )
     })
 
-    it("returns 400 when amount_subtotal mismatches computed metadata subtotal", async () => {
+    it("acknowledges subtotal mismatches and queues an admin notification", async () => {
       mocks.constructEvent.mockReturnValue(makeEvent(makeSession({ amount_subtotal: 9999 })))
       const res = await POST(makeRequest())
-      expect(res.status).toBe(400)
-      expect((await res.json()).error).toMatch(/mismatch/)
+      expect(res.status).toBe(200)
+      expect((await res.json()).received).toBe(true)
+      expect(mocks.queueNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: "admin_webhook_validation_failed",
+          payload: expect.objectContaining({
+            sessionId: SESSION_ID,
+            reason: "session_subtotal_mismatch",
+            amountSubtotal: 9999,
+          }),
+        })
+      )
     })
   })
 
