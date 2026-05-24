@@ -128,12 +128,15 @@ export async function deleteProduct(
   _prevState: DeleteProductState,
   formData: FormData
 ): Promise<DeleteProductState> {
-  await requireAdmin()
-
   const parsedId = z.string().uuid().safeParse(formData.get("id"))
   if (!parsedId.success) return { error: "Invalid product" }
 
-  const id = parsedId.data
+  return deleteProductById(parsedId.data)
+}
+
+export async function deleteProductById(id: string): Promise<DeleteProductState> {
+  await requireAdmin()
+
   const db = getDb()
   const [product] = await db
     .select({ slug: products.slug })
