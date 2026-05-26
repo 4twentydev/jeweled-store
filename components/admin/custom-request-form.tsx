@@ -4,10 +4,11 @@ import { useState, useTransition } from "react"
 import { updateCustomRequest } from "@/server/actions/admin"
 import type { CustomRequestStatus } from "@/db/schema"
 
-const STATUSES: { value: CustomRequestStatus; label: string }[] = [
+type EditableCustomRequestStatus = Exclude<CustomRequestStatus, "paid">
+
+const STATUSES: { value: EditableCustomRequestStatus; label: string }[] = [
   { value: "pending", label: "Pending" },
   { value: "quoted", label: "Quoted" },
-  { value: "paid", label: "Paid" },
   { value: "prep", label: "Prep" },
   { value: "assembly", label: "Assembly" },
   { value: "shipping", label: "Shipping" },
@@ -30,7 +31,9 @@ export function CustomRequestForm({
   quotedPrice: number | null
   stripePaymentLinkId: string | null
 }) {
-  const [status, setStatus] = useState<CustomRequestStatus>(currentStatus)
+  const [status, setStatus] = useState<EditableCustomRequestStatus>(
+    currentStatus === "paid" ? "prep" : currentStatus
+  )
   const [price, setPrice] = useState(quotedPrice ? String(quotedPrice / 100) : "")
   const [paymentLink, setPaymentLink] = useState(stripePaymentLinkId ?? "")
   const [error, setError] = useState<string | null>(null)
@@ -66,7 +69,7 @@ export function CustomRequestForm({
           <select
             id="custom-status"
             value={status}
-            onChange={(event) => setStatus(event.target.value as CustomRequestStatus)}
+              onChange={(event) => setStatus(event.target.value as EditableCustomRequestStatus)}
             className={INPUT}
           >
             {STATUSES.map((item) => (

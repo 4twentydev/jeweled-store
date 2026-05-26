@@ -8,8 +8,9 @@ import {
   uuid,
   index,
   pgEnum,
+  check,
 } from "drizzle-orm/pg-core"
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 
 export type OrderStatus = "new" | "prep" | "assembly" | "shipping" | "shipped" | "cancelled"
 export type CustomRequestStatus = "pending" | "quoted" | "paid" | "prep" | "assembly" | "shipping" | "shipped" | "cancelled"
@@ -67,6 +68,8 @@ export const products = pgTable(
   (t) => [
     index("products_active_idx").on(t.active),
     index("products_featured_idx").on(t.featured),
+    check("products_price_cents_positive", sql`${t.priceCents} > 0`),
+    check("products_stock_nonnegative", sql`${t.stock} >= 0`),
   ]
 )
 
@@ -84,33 +87,61 @@ export const orders = pgTable(
     shipping: jsonb("shipping").$type<ShippingAddress>(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (t) => [index("orders_customer_email_idx").on(t.customerEmail)]
+  (t) => [
+    index("orders_customer_email_idx").on(t.customerEmail),
+    check("orders_total_cents_nonnegative", sql`${t.totalCents} >= 0`),
+    check(
+      "orders_status_valid",
+      sql`${t.status} in ('new', 'prep', 'assembly', 'shipping', 'shipped', 'cancelled')`
+    ),
+  ]
 )
 
-export const orderItems = pgTable("order_items", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  orderId: uuid("order_id")
-    .notNull()
-    .references(() => orders.id, { onDelete: "cascade" }),
-  productId: uuid("product_id")
-    .notNull()
-    .references(() => products.id),
-  quantity: integer("quantity").notNull(),
-  priceAtPurchase: integer("price_at_purchase").notNull(),
-})
+export const orderItems = pgTable(
+  "order_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id),
+    quantity: integer("quantity").notNull(),
+    priceAtPurchase: integer("price_at_purchase").notNull(),
+  },
+  (t) => [
+    check("order_items_quantity_positive", sql`${t.quantity} > 0`),
+    check("order_items_price_at_purchase_positive", sql`${t.priceAtPurchase} > 0`),
+  ]
+)
 
-export const customRequests = pgTable("custom_requests", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  customerEmail: text("customer_email").notNull(),
-  customerName: text("customer_name").notNull(),
-  itemDescription: text("item_description").notNull(),
-  referenceImages: jsonb("reference_images").$type<string[]>().notNull().default([]),
-  budgetRange: text("budget_range").notNull(),
-  status: text("status").$type<CustomRequestStatus>().notNull().default("pending"),
-  quotedPrice: integer("quoted_price"),
-  stripePaymentLinkId: text("stripe_payment_link_id"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-})
+export const customRequests = pgTable(
+  "custom_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    customerEmail: text("customer_email").notNull(),
+    customerName: text("customer_name").notNull(),
+    itemDescription: text("item_description").notNull(),
+    referenceImages: jsonb("reference_images").$type<string[]>().notNull().default([]),
+    budgetRange: text("budget_range").notNull(),
+    status: text("status").$type<CustomRequestStatus>().notNull().default("pending"),
+    quotedPrice: integer("quoted_price"),
+    stripePaymentLinkId: text("stripe_payment_link_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    check("custom_requests_budget_range_valid", sql`${t.budgetRange} in ('25', '35', '50')`),
+    check(
+      "custom_requests_status_valid",
+      sql`${t.status} in ('pending', 'quoted', 'paid', 'prep', 'assembly', 'shipping', 'shipped', 'cancelled')`
+    ),
+    check(
+      "custom_requests_quoted_price_nonnegative",
+      sql`${t.quotedPrice} is null or ${t.quotedPrice} >= 0`
+    ),
+  ]
+)
 
 export const adminLoginAttempts = pgTable(
   "admin_login_attempts",
@@ -172,6 +203,7 @@ export const productReservations = pgTable(
     index("product_reservation_token_idx").on(t.reservationToken),
     index("product_reservation_session_idx").on(t.stripeCheckoutSessionId),
     index("product_reservation_expiry_idx").on(t.expiresAt),
+    check("product_reservations_quantity_positive", sql`${t.quantity} > 0`),
   ]
 )
 
@@ -190,7 +222,13 @@ export const notificationEvents = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     sentAt: timestamp("sent_at"),
   },
-  (t) => [index("notification_events_kind_idx").on(t.kind, t.createdAt)]
+  (t) => [
+    index("notification_events_kind_idx").on(t.kind, t.createdAt),
+    check(
+      "notification_events_status_valid",
+      sql`${t.status} in ('pending', 'sent', 'failed', 'skipped')`
+    ),
+  ]
 )
 
 export const ordersRelations = relations(orders, ({ many }) => ({

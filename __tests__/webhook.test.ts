@@ -196,11 +196,16 @@ describe("POST /api/stripe/webhook", () => {
   })
 
   describe("metadata validation", () => {
-    it("acknowledges unparseable metadata JSON and queues an admin notification", async () => {
+    it("refunds and records a cancelled order for unparseable metadata JSON", async () => {
       mocks.constructEvent.mockReturnValue(makeEvent(makeSession({ metadata: { items: "bad-json" } })))
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
       expect((await res.json()).received).toBe(true)
+      expect(mocks.refundCreate).toHaveBeenCalledOnce()
+      expect(releaseReservationsBySession).toHaveBeenCalledWith(SESSION_ID)
+      expect(mocks.insertValues).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "cancelled", stripeCheckoutSessionId: SESSION_ID })
+      )
       expect(mocks.queueNotification).toHaveBeenCalledWith(
         expect.objectContaining({
           kind: "admin_webhook_validation_failed",
@@ -212,11 +217,16 @@ describe("POST /api/stripe/webhook", () => {
       )
     })
 
-    it("acknowledges subtotal mismatches and queues an admin notification", async () => {
+    it("refunds and records a cancelled order for subtotal mismatches", async () => {
       mocks.constructEvent.mockReturnValue(makeEvent(makeSession({ amount_subtotal: 9999 })))
       const res = await POST(makeRequest())
       expect(res.status).toBe(200)
       expect((await res.json()).received).toBe(true)
+      expect(mocks.refundCreate).toHaveBeenCalledOnce()
+      expect(releaseReservationsBySession).toHaveBeenCalledWith(SESSION_ID)
+      expect(mocks.insertValues).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "cancelled", stripeCheckoutSessionId: SESSION_ID })
+      )
       expect(mocks.queueNotification).toHaveBeenCalledWith(
         expect.objectContaining({
           kind: "admin_webhook_validation_failed",
@@ -226,6 +236,51 @@ describe("POST /api/stripe/webhook", () => {
             amountSubtotal: 9999,
           }),
         })
+      )
+    })
+  })
+
+  describe("custom request payments", () => {
+    it("marks a custom request paid from Stripe metadata before product fulfillment", async () => {
+      mocks.constructEvent.mockReturnValue(
+        makeEvent(
+          makeSession({
+            client_reference_id: UUID1,
+            metadata: { customRequestId: UUID1 },
+            payment_link: "plink_test_123",
+          })
+        )
+      )
+      mocks.selectWhere.mockResolvedValueOnce([
+        {
+          id: UUID1,
+          customerEmail: "buyer@example.com",
+          customerName: "Test Buyer",
+          status: "quoted",
+        },
+      ])
+      mocks.reservationReleaseReturning.mockResolvedValueOnce([
+        {
+          id: UUID1,
+          customerEmail: "buyer@example.com",
+          customerName: "Test Buyer",
+          quotedPrice: 5000,
+        },
+      ])
+
+      const res = await POST(makeRequest())
+
+      expect(res.status).toBe(200)
+      expect(mocks.reservationUpdateSet).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "paid", stripePaymentLinkId: "plink_test_123" })
+      )
+      expect(mocks.refundCreate).not.toHaveBeenCalled()
+      expect(mocks.transaction).not.toHaveBeenCalled()
+      expect(mocks.queueNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "admin_custom_request_paid" })
+      )
+      expect(mocks.queueNotification).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: "custom_request_payment_confirmation" })
       )
     })
   })

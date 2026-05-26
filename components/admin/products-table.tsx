@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -25,10 +25,6 @@ export function ProductsTable({ initialProducts }: { initialProducts: ProductRow
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Record<string, boolean>>({})
   const [pendingToggleIds, setPendingToggleIds] = useState<Record<string, boolean>>({})
   const [isRefreshing, startRefreshTransition] = useTransition()
-
-  useEffect(() => {
-    setProducts(initialProducts)
-  }, [initialProducts])
 
   async function handleDelete(productId: string) {
     const index = products.findIndex((product) => product.id === productId)

@@ -1,3 +1,5 @@
+import { isIP } from "node:net"
+
 type Bucket = {
   count: number
   resetAt: number
@@ -5,12 +7,42 @@ type Bucket = {
 
 const buckets = new Map<string, Bucket>()
 
+function firstForwardedValue(value: string | null): string | null {
+  const candidate = value?.split(",")[0]?.trim()
+  if (!candidate || candidate.toLowerCase() === "unknown") return null
+  return candidate
+}
+
+function normalizeIp(value: string | null): string | null {
+  const candidate = firstForwardedValue(value)
+  if (!candidate) return null
+
+  const unwrapped =
+    candidate.startsWith("[") && candidate.includes("]")
+      ? candidate.slice(1, candidate.indexOf("]"))
+      : candidate
+  const withoutPort =
+    unwrapped.includes(":") && isIP(unwrapped) === 0
+      ? unwrapped.slice(0, unwrapped.lastIndexOf(":"))
+      : unwrapped
+
+  return isIP(withoutPort) ? withoutPort : null
+}
+
 export function getClientIp(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  )
+  const trustedHeaders = [
+    "x-vercel-forwarded-for",
+    "cf-connecting-ip",
+    "true-client-ip",
+    "x-real-ip",
+  ]
+
+  for (const header of trustedHeaders) {
+    const ip = normalizeIp(request.headers.get(header))
+    if (ip) return ip
+  }
+
+  return normalizeIp(request.headers.get("x-forwarded-for")) ?? "unknown"
 }
 
 export function isAllowedOrigin(request: Request, appUrl: string): boolean {

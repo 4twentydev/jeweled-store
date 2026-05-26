@@ -50,9 +50,25 @@ export async function generateMetadata({
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return { title: "Product Not Found" }
+  const url = `/product/${product.slug}`
+  const images = product.images.map((image) => ({
+    url: image,
+    alt: product.name,
+  }))
+
   return {
     title: product.name,
     description: product.description.slice(0, 160),
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: product.name,
+      description: product.description.slice(0, 160),
+      url,
+      type: "website",
+      images,
+    },
   }
 }
 

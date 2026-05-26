@@ -5,30 +5,67 @@ import { getEnv } from "@/lib/env"
 
 type NotificationPayload = Record<string, unknown>
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+function payloadText(payload: NotificationPayload, key: string): string {
+  return String(payload[key] ?? "")
+}
+
+function formatCents(value: unknown): string {
+  return typeof value === "number"
+    ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value / 100)
+    : ""
+}
+
 function buildMessage(
   kind: string,
   payload: NotificationPayload
 ): { text: string; html: string } {
+  const orderId = payloadText(payload, "orderId")
+  const reason = payloadText(payload, "reason") || "inventory update"
+  const total = formatCents(payload.totalCents)
+  const paymentLink = payloadText(payload, "paymentLink")
+  const quotedPrice = payloadText(payload, "quotedPrice")
+  const customRequestId = payloadText(payload, "customRequestId")
+
   switch (kind) {
     case "order_confirmation":
       return {
-        text: `Your order has been confirmed. Order ID: ${String(payload.orderId ?? "")}. Total: ${String(payload.totalCents ?? "")}.`,
-        html: `<p>Your order has been confirmed.</p><p>Order ID: ${String(payload.orderId ?? "")}</p><p>Total cents: ${String(payload.totalCents ?? "")}</p>`,
+        text: `Your order has been confirmed. Order ID: ${orderId}. Total: ${total}.`,
+        html: `<p>Your order has been confirmed.</p><p>Order ID: ${escapeHtml(orderId)}</p><p>Total: ${escapeHtml(total)}</p>`,
       }
     case "order_cancelled":
       return {
-        text: `Your order could not be fulfilled automatically. Order ID: ${String(payload.orderId ?? "")}. Reason: ${String(payload.reason ?? "inventory update")}.`,
-        html: `<p>Your order could not be fulfilled automatically.</p><p>Order ID: ${String(payload.orderId ?? "")}</p><p>Reason: ${String(payload.reason ?? "inventory update")}</p>`,
+        text: `Your order could not be fulfilled automatically. Order ID: ${orderId}. Reason: ${reason}.`,
+        html: `<p>Your order could not be fulfilled automatically.</p><p>Order ID: ${escapeHtml(orderId)}</p><p>Reason: ${escapeHtml(reason)}</p>`,
       }
     case "customer_quote_ready":
       return {
-        text: `Your custom quote is ready. Price: ${String(payload.quotedPrice ?? "")}. Payment link: ${String(payload.paymentLink ?? "")}`,
-        html: `<p>Your custom quote is ready.</p><p>Price: ${String(payload.quotedPrice ?? "")}</p><p>Payment link: ${String(payload.paymentLink ?? "")}</p>`,
+        text: `Your custom quote is ready. Price: ${quotedPrice}. Payment link: ${paymentLink}`,
+        html: `<p>Your custom quote is ready.</p><p>Price: ${escapeHtml(quotedPrice)}</p><p>Payment link: ${escapeHtml(paymentLink)}</p>`,
+      }
+    case "admin_custom_request_paid":
+      return {
+        text: `Custom request payment received. Request ID: ${customRequestId}. Total: ${total}.`,
+        html: `<p>Custom request payment received.</p><p>Request ID: ${escapeHtml(customRequestId)}</p><p>Total: ${escapeHtml(total)}</p>`,
+      }
+    case "custom_request_payment_confirmation":
+      return {
+        text: `Your custom request payment was received. Request ID: ${customRequestId}. Total: ${total}.`,
+        html: `<p>Your custom request payment was received.</p><p>Request ID: ${escapeHtml(customRequestId)}</p><p>Total: ${escapeHtml(total)}</p>`,
       }
     default:
+      const json = JSON.stringify(payload, null, 2)
       return {
         text: JSON.stringify(payload),
-        html: `<pre>${JSON.stringify(payload, null, 2)}</pre>`,
+        html: `<pre>${escapeHtml(json)}</pre>`,
       }
   }
 }

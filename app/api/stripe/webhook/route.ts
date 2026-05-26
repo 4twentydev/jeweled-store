@@ -3,7 +3,14 @@ import { revalidatePath } from "next/cache"
 import { getStripe } from "@/lib/stripe"
 import { getEnv } from "@/lib/env"
 import { getDb } from "@/db"
-import { notificationEvents, orders, orderItems, productReservations, products } from "@/db/schema"
+import {
+  customRequests,
+  notificationEvents,
+  orders,
+  orderItems,
+  productReservations,
+  products,
+} from "@/db/schema"
 import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm"
 import { randomUUID } from "crypto"
 import { z } from "zod"
@@ -23,17 +30,59 @@ async function acknowledgeInvalidCompletedSession(
   payload: Record<string, unknown> = {}
 ) {
   console.error("[stripe webhook] invalid completed session:", session.id, reason, payload)
+  await refundUnfulfillableSession(session)
+  await releaseReservationsBySession(session.id)
+
+  const db = getDb()
+  const orderId = randomUUID()
+  const totalCents = typeof session.amount_total === "number" ? session.amount_total : 0
+  const shipping = getShippingAddress(session)
+
+  try {
+    await db.insert(orders).values({
+      id: orderId,
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+      lookupToken:
+        typeof session.metadata?.lookupToken === "string" ? session.metadata.lookupToken : undefined,
+      customerEmail: session.customer_email ?? undefined,
+      customerName: session.customer_details?.name ?? undefined,
+      status: "cancelled",
+      totalCents,
+      shipping,
+    })
+  } catch (err) {
+    if (!isUniqueConstraintViolation(err)) throw err
+  }
+
   await queueNotification({
     kind: "admin_webhook_validation_failed",
     channel: "admin",
     recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
     subject: `Stripe webhook validation failed: ${session.id}`,
     payload: {
+      orderId,
       sessionId: session.id,
       reason,
       ...payload,
     },
   })
+  if (session.customer_email) {
+    await queueNotification({
+      kind: "order_cancelled",
+      channel: "email",
+      recipient: session.customer_email,
+      subject: `Order update: ${session.id}`,
+      payload: {
+        orderId,
+        sessionId: session.id,
+        customerEmail: session.customer_email,
+        totalCents,
+        reason,
+      },
+    })
+  }
   await processPendingNotifications()
   return NextResponse.json({ received: true })
 }
@@ -64,6 +113,108 @@ const metadataItemsSchema = z
   )
   .min(1)
 
+function getShippingAddress(session: Stripe.Checkout.Session) {
+  const customerDetails = session.customer_details
+  return customerDetails?.address
+    ? {
+        name: customerDetails.name ?? "",
+        line1: customerDetails.address.line1 ?? "",
+        line2: customerDetails.address.line2 ?? undefined,
+        city: customerDetails.address.city ?? "",
+        state: customerDetails.address.state ?? "",
+        postal_code: customerDetails.address.postal_code ?? "",
+        country: customerDetails.address.country ?? "",
+      }
+    : undefined
+}
+
+async function handleCustomRequestPayment(session: Stripe.Checkout.Session): Promise<boolean> {
+  const customRequestReference =
+    typeof session.metadata?.customRequestId === "string"
+      ? session.metadata.customRequestId
+      : typeof session.client_reference_id === "string"
+        ? session.client_reference_id
+        : undefined
+  const customRequestId =
+    typeof customRequestReference === "string" &&
+    z.string().uuid().safeParse(customRequestReference).success
+      ? customRequestReference
+      : undefined
+  const paymentLink =
+    typeof session.payment_link === "string" && session.payment_link.trim()
+      ? session.payment_link.trim()
+      : undefined
+
+  if (!customRequestId && !paymentLink) return false
+
+  const whereClause = customRequestId
+    ? eq(customRequests.id, customRequestId)
+    : eq(customRequests.stripePaymentLinkId, paymentLink!)
+
+  const totalCents = typeof session.amount_total === "number" ? session.amount_total : undefined
+  const [existingRequest] = await getDb()
+    .select({
+      id: customRequests.id,
+      customerEmail: customRequests.customerEmail,
+      customerName: customRequests.customerName,
+      status: customRequests.status,
+    })
+    .from(customRequests)
+    .where(whereClause)
+
+  if (!existingRequest) return false
+  if (existingRequest.status === "paid") return true
+
+  const [request] = await getDb()
+    .update(customRequests)
+    .set({
+      status: "paid",
+      ...(paymentLink ? { stripePaymentLinkId: paymentLink } : {}),
+      ...(typeof totalCents === "number"
+        ? { quotedPrice: sql`coalesce(${customRequests.quotedPrice}, ${totalCents})` }
+        : {}),
+    })
+    .where(eq(customRequests.id, existingRequest.id))
+    .returning({
+      id: customRequests.id,
+      customerEmail: customRequests.customerEmail,
+      customerName: customRequests.customerName,
+      quotedPrice: customRequests.quotedPrice,
+    })
+
+  if (!request) return false
+
+  await queueNotification({
+    kind: "admin_custom_request_paid",
+    channel: "admin",
+    recipient: getEnv().ADMIN_NOTIFICATION_EMAIL ?? getEnv().ADMIN_EMAIL,
+    subject: `Custom request paid: ${request.customerName}`,
+    payload: {
+      customRequestId: request.id,
+      sessionId: session.id,
+      customerEmail: request.customerEmail,
+      totalCents,
+    },
+  })
+  await queueNotification({
+    kind: "custom_request_payment_confirmation",
+    channel: "email",
+    recipient: request.customerEmail,
+    subject: "Your JWLD custom request payment was received",
+    payload: {
+      customRequestId: request.id,
+      sessionId: session.id,
+      customerName: request.customerName,
+      totalCents,
+    },
+  })
+  await processPendingNotifications()
+  revalidatePath("/admin")
+  revalidatePath("/admin/custom-requests")
+  revalidatePath(`/admin/custom-requests/${request.id}`)
+  return true
+}
+
 export async function POST(request: Request) {
   const body = await request.text()
   const signature = request.headers.get("stripe-signature")
@@ -91,6 +242,10 @@ export async function POST(request: Request) {
 
   const session = event.data.object as Stripe.Checkout.Session
   if (session.payment_status && session.payment_status !== "paid") {
+    return NextResponse.json({ received: true })
+  }
+
+  if (await handleCustomRequestPayment(session)) {
     return NextResponse.json({ received: true })
   }
 
@@ -133,18 +288,7 @@ export async function POST(request: Request) {
   const totalCents = typeof session.amount_total === "number" ? session.amount_total : itemsSubtotalCents
 
   const customerDetails = session.customer_details
-  const shipping =
-    customerDetails?.address
-      ? {
-          name: customerDetails.name ?? "",
-          line1: customerDetails.address.line1 ?? "",
-          line2: customerDetails.address.line2 ?? undefined,
-          city: customerDetails.address.city ?? "",
-          state: customerDetails.address.state ?? "",
-          postal_code: customerDetails.address.postal_code ?? "",
-          country: customerDetails.address.country ?? "",
-        }
-      : undefined
+  const shipping = getShippingAddress(session)
 
   const db = getDb()
   const orderId = randomUUID()

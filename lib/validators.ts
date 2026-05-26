@@ -85,9 +85,22 @@ export const customRequestSchema = z.object({
 export type CustomRequestInput = z.infer<typeof customRequestSchema>
 
 export const customRequestAdminSchema = z.object({
-  status: z.enum(["pending", "quoted", "paid", "prep", "assembly", "shipping", "shipped", "cancelled"]),
+  status: z.enum(["pending", "quoted", "prep", "assembly", "shipping", "shipped", "cancelled"]),
   quotedPriceInDollars: z.number().min(0).optional(),
-  stripePaymentLinkId: z.string().trim().optional(),
+  stripePaymentLinkId: z
+    .string()
+    .trim()
+    .refine((value) => {
+      if (!value) return true
+      if (value.startsWith("plink_")) return true
+      try {
+        const url = new URL(value)
+        return url.protocol === "https:" && url.hostname.endsWith("stripe.com")
+      } catch {
+        return false
+      }
+    }, "Enter a Stripe Payment Link URL or plink_ ID")
+    .optional(),
 })
 
 export type CustomRequestAdminInput = z.infer<typeof customRequestAdminSchema>
